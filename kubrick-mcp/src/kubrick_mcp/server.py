@@ -8,6 +8,10 @@ from kubrick_mcp.tools import (
     get_video_clip_from_image,
     get_video_clip_from_user_query,
     process_video,
+    # MTB Action Video Editor tools
+    detect_action_highlights,
+    assemble_highlight_video,
+    generate_mtb_highlight_reel,
 )
 
 
@@ -38,6 +42,28 @@ def add_mcp_tools(mcp: FastMCP):
         description="Use this tool to get an answer to a question about the video.",
         fn=ask_question_about_video,
         tags={"ask", "question", "information"},
+    )
+
+    # MTB Action Video Editor Tools
+    mcp.add_tool(
+        name="detect_action_highlights",
+        description="Detect action highlights in an MTB video. Analyzes frames and audio to identify exciting moments for a highlight reel.",
+        fn=detect_action_highlights,
+        tags={"mtb", "highlights", "action", "detect"},
+    )
+
+    mcp.add_tool(
+        name="assemble_highlight_video",
+        description="Assemble a highlight reel video from detected action clips. Creates a compiled video from selected highlights.",
+        fn=assemble_highlight_video,
+        tags={"mtb", "highlights", "assemble", "video"},
+    )
+
+    mcp.add_tool(
+        name="generate_mtb_highlight_reel",
+        description="End-to-end MTB highlight reel generation. Detects action highlights and assembles them into a final video in one operation.",
+        fn=generate_mtb_highlight_reel,
+        tags={"mtb", "highlights", "generate", "end-to-end"},
     )
 
 
