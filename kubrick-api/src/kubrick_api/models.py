@@ -31,6 +31,20 @@ class VideoUploadResponse(BaseModel):
     task_id: str | None = None
 
 
+class GenerateMTBHighlightRequest(BaseModel):
+    video_path: str
+    target_duration_seconds: float
+    min_action_score: float | None = 60.0
+    use_ffmpeg: bool = True
+
+
+class GenerateMTBHighlightResponse(BaseModel):
+    message: str
+    task_id: str | None = None
+    output_path: str | None = None
+    num_highlights: int | None = None
+
+
 # -- LLM Structured Outputs Models --
 
 

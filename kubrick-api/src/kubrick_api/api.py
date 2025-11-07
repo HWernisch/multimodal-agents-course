@@ -16,6 +16,8 @@ from kubrick_api.agent import GroqAgent
 from kubrick_api.config import get_settings
 from kubrick_api.models import (
     AssistantMessageResponse,
+    GenerateMTBHighlightRequest,
+    GenerateMTBHighlightResponse,
     ProcessVideoRequest,
     ProcessVideoResponse,
     ResetMemoryResponse,
@@ -164,6 +166,98 @@ async def upload_video(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Error uploading video: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/generate-mtb-highlight")
+async def generate_mtb_highlight(
+    request: GenerateMTBHighlightRequest,
+    bg_tasks: BackgroundTasks,
+    fastapi_request: Request
+):
+    """
+    Generate MTB action highlight reel from a processed video.
+
+    This endpoint uses the generate_mtb_highlight_reel MCP tool to:
+    1. Detect action highlights in the video
+    2. Assemble them into a final highlight reel
+
+    Args:
+        request: Contains video_path, target_duration_seconds, min_action_score, use_ffmpeg
+
+    Returns:
+        task_id for background processing or direct output_path if synchronous
+    """
+    task_id = str(uuid4())
+    bg_task_states = fastapi_request.app.state.bg_task_states
+
+    async def background_generate_highlight(
+        video_path: str,
+        target_duration: float,
+        min_score: float,
+        use_ffmpeg: bool,
+        task_id: str
+    ):
+        """Background task to generate MTB highlight reel."""
+        bg_task_states[task_id] = {
+            "status": TaskStatus.IN_PROGRESS,
+            "message": "Analyzing video for action moments..."
+        }
+
+        try:
+            # Call MCP tool via client
+            client = Client(settings.MCP_SERVER)
+
+            logger.info(f"Generating MTB highlight: {video_path}, target={target_duration}s, score={min_score}")
+
+            result = await client.call_tool(
+                "generate_mtb_highlight_reel",
+                video_path=video_path,
+                target_duration_seconds=target_duration,
+                min_action_score=min_score,
+                use_ffmpeg=use_ffmpeg
+            )
+
+            if result.get("error"):
+                bg_task_states[task_id] = {
+                    "status": TaskStatus.FAILED,
+                    "message": result["error"]
+                }
+            else:
+                bg_task_states[task_id] = {
+                    "status": TaskStatus.COMPLETED,
+                    "message": "Highlight reel generated successfully!",
+                    "output_path": result.get("output_path"),
+                    "num_highlights": result.get("num_highlights", 0),
+                    "total_duration": result.get("total_duration", 0)
+                }
+                logger.info(f"MTB highlight generated: {result.get('output_path')}")
+
+        except Exception as e:
+            logger.error(f"Error generating MTB highlight: {e}")
+            bg_task_states[task_id] = {
+                "status": TaskStatus.FAILED,
+                "message": str(e)
+            }
+
+    # Start background task
+    bg_tasks.add_task(
+        background_generate_highlight,
+        request.video_path,
+        request.target_duration_seconds,
+        request.min_action_score or 60.0,
+        request.use_ffmpeg,
+        task_id
+    )
+
+    bg_task_states[task_id] = {
+        "status": TaskStatus.PENDING,
+        "message": "Starting highlight generation..."
+    }
+
+    return GenerateMTBHighlightResponse(
+        message="MTB highlight generation started",
+        task_id=task_id
+    )
 
 
 @app.get("/media/{file_path:path}")
