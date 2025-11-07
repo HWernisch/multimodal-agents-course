@@ -13,7 +13,11 @@ from pixeltable.iterators.video import FrameIterator
 
 import kubrick_mcp.video.ingestion.registry as registry
 from kubrick_mcp.config import get_settings
-from kubrick_mcp.video.ingestion.functions import extract_text_from_chunk, resize_image
+from kubrick_mcp.video.ingestion.functions import (
+    extract_text_from_chunk,
+    resize_image,
+    calculate_audio_intensity,
+)
 from kubrick_mcp.video.ingestion.tools import re_encode_video
 
 if TYPE_CHECKING:
@@ -99,6 +103,7 @@ class VideoProcessor:
         self._create_audio_chunks_view()
         self._add_audio_transcription()
         self._add_audio_text_extraction()
+        self._add_audio_intensity_analysis()
         self._add_audio_embedding_index()
 
     def _add_audio_extraction(self):
@@ -134,6 +139,14 @@ class VideoProcessor:
             chunk_text=extract_text_from_chunk(self.audio_chunks.transcription),
             if_exists="ignore",
         )
+
+    def _add_audio_intensity_analysis(self):
+        """Add audio intensity analysis for MTB action detection."""
+        self.audio_chunks.add_computed_column(
+            audio_intensity=calculate_audio_intensity(self.audio_chunks.audio_chunk),
+            if_exists="ignore",
+        )
+        logger.info("Added audio intensity analysis for action detection")
 
     def _add_audio_embedding_index(self):
         self.audio_chunks.add_embedding_index(
