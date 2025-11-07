@@ -34,7 +34,15 @@ class Settings(BaseSettings):
     CAPTION_SIMILARITY_EMBD_MODEL: str = "openai/clip-vit-base-patch32"
 
     # --- Caption Similarity Search Configuration ---
-    CAPTION_MODEL_PROMPT: str = "Describe what is happening in the image"
+    # MTB Action Video Editor: Optimized prompt for action detection
+    CAPTION_MODEL_PROMPT: str = """Analyze this mountainbike action camera frame and describe:
+1. Speed/Motion: (slow/moderate/fast/very fast)
+2. Action Type: (riding, jumping, trick, drop, crash, scenic, stationary)
+3. Excitement Level: (low/medium/high/extreme)
+4. Terrain: (flat/uphill/downhill/technical/jump section)
+5. Key Details: Brief description of what makes this moment notable
+
+Be concise and focus on action-relevant details that would help identify exciting moments for a highlight reel."""
     DELTA_SECONDS_FRAME_INTERVAL: float = 5.0
 
     # --- Video Search Engine Configuration ---
@@ -42,6 +50,18 @@ class Settings(BaseSettings):
     VIDEO_CLIP_CAPTION_SEARCH_TOP_K: int = 1
     VIDEO_CLIP_IMAGE_SEARCH_TOP_K: int = 1
     QUESTION_ANSWER_TOP_K: int = 3
+
+    # --- MTB Action Video Editor Configuration ---
+    # Minimum action score threshold (0-100) for highlight selection
+    MTB_MIN_ACTION_SCORE: float = 60.0
+    # Minimum clip duration in seconds
+    MTB_CLIP_MIN_DURATION: float = 3.0
+    # Maximum clip duration in seconds
+    MTB_CLIP_MAX_DURATION: float = 8.0
+    # Enable transitions between clips
+    MTB_ENABLE_TRANSITIONS: bool = True
+    # Transition duration in seconds
+    MTB_TRANSITION_DURATION: float = 0.5
 
 
 @lru_cache(maxsize=1)
