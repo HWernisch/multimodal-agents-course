@@ -464,28 +464,50 @@ docker-compose up
 - [ ] Anpassbare Clip-Grenzen in UI
 - [ ] Dokumentation für Contributors
 
-### Version 1.5 (UX Improvements)
+### Version 1.5 (Production Scaling - VServer)
+- [ ] **Celery + Redis Task Queue** - Dedicated Server Deployment
+  - 4 parallel workers (8 vCPU, 16GB RAM)
+  - Performance: 16-24 videos/hour
+  - Cost: ~$0.12/video (at 667+ videos/month)
+  - Horizontal scaling capability
+  - Task retry & prioritization
+- [ ] Performance Monitoring Dashboard
 - [ ] Custom Action-Type Weights in UI
 - [ ] Batch-Processing (mehrere Videos)
 - [ ] Export-Presets (YouTube, Instagram, TikTok)
-- [ ] Keyboard Shortcuts
-- [ ] Dark/Light Mode Toggle
 
 ### Version 2.0 (Advanced CV - Option B)
 - [ ] Motion Detection (Optical Flow)
 - [ ] Pose Detection für Trick-Erkennung (MediaPipe/YOLO)
-- [ ] Musik-Upload & Beat-Synchronisierung
-- [ ] Automatische Color-Grading
+- [ ] Beat-Synchronisierung mit custom Musik
+- [ ] Automatisches Color-Grading
 - [ ] Slow-Motion für Top-Highlights
 - [ ] Object Tracking (Rider Detection)
+
+### Version 2.5 (Cloud-Native - GCP) ☁️
+- [ ] **Google Cloud Platform Deployment**
+  - Cloud Run (Serverless API)
+  - Cloud Run Jobs (Worker - no timeout limits)
+  - Cloud Storage (Videos/Highlights)
+  - Firestore (Task state)
+  - Firebase Cloud Messaging (Push notifications)
+- [ ] **Infinite Scalability**
+  - 0 → 1000+ concurrent jobs
+  - Pay-per-use: ~$0.19/video
+  - Per-job cost tracking
+- [ ] **Push Notifications**
+  - Mobile app notifications
+  - Browser push (PWA)
+  - Email alerts
+- [ ] **Ideal für:** Bursty workloads, >1000 videos/month, global users
 
 ### Version 3.0 (Multi-Video & Professional)
 - [ ] Multi-Camera-Support mit Auto-Angle-Selection
 - [ ] 360° Video Support
 - [ ] GPS Data Overlay (Speed, Elevation, Map)
 - [ ] Strava/Komoot Integration
-- [ ] Cloud Processing & Sharing
-- [ ] Collaborative Editing
+- [ ] Team/Organization Accounts
+- [ ] White-Label Solution
 
 ---
 

@@ -303,7 +303,12 @@ No breaking changes. New MCP tools added, existing tools unchanged.
 - [ ] Better error messages and user feedback
 - [ ] Preset profiles ("Extreme Action", "Balanced", "Cinematic")
 
-### Version 1.5 (UX Improvements)
+### Version 1.5 (Production Scaling - VServer)
+- [ ] **Celery + Redis Task Queue** (Dedicated Server)
+  - 4 parallel workers on 8 vCPU, 16GB RAM server
+  - Performance: 16-24 videos/hour (10 min videos each)
+  - Cost: ~$0.12/video at scale (667+ videos/month)
+- [ ] Performance monitoring dashboard
 - [ ] Clip preview before final export
 - [ ] Adjustable clip boundaries in UI
 - [ ] Custom action type weights
@@ -315,11 +320,27 @@ No breaking changes. New MCP tools added, existing tools unchanged.
 - [ ] Beat synchronization with custom music
 - [ ] Automatic color grading
 - [ ] Slow-motion for highlights
+- [ ] Object tracking (rider detection)
 
-### Version 3.0 (Multi-Video)
-- [ ] Multi-camera support
-- [ ] Automatic best-angle selection
+### Version 2.5 (Cloud-Native - GCP) ☁️
+- [ ] **Google Cloud Platform Deployment**
+  - Cloud Run (serverless API), Cloud Run Jobs (workers)
+  - Cloud Storage, Firestore, Firebase Cloud Messaging
+  - Infinite auto-scaling (0 → 1000+ concurrent jobs)
+  - Pay-per-use: ~$0.19/video (no base cost)
+- [ ] Per-job cost tracking & analytics
+- [ ] Push notifications (mobile/web/email)
+- [ ] Multi-region deployment
+- [ ] **Best for:** Bursty workloads, >1000 videos/month, global users
+
+### Version 3.0 (Multi-Video & Professional)
+- [ ] Multi-camera support with auto-angle selection
+- [ ] 360° video support
+- [ ] GPS data overlay (speed, elevation, map)
+- [ ] Strava/Komoot integration
+- [ ] Team/Organization accounts
 - [ ] Social media export formats (Instagram, TikTok, YouTube Shorts)
+- [ ] White-label solution
 
 ---
 
