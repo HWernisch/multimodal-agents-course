@@ -464,17 +464,29 @@ docker-compose up
 - [ ] Anpassbare Clip-Grenzen in UI
 - [ ] Dokumentation für Contributors
 
-### Version 1.5 (Production Scaling - VServer)
-- [ ] **Celery + Redis Task Queue** - Dedicated Server Deployment
-  - 4 parallel workers (8 vCPU, 16GB RAM)
-  - Performance: 16-24 videos/hour
-  - Cost: ~$0.12/video (at 667+ videos/month)
-  - Horizontal scaling capability
-  - Task retry & prioritization
-- [ ] Performance Monitoring Dashboard
-- [ ] Custom Action-Type Weights in UI
-- [ ] Batch-Processing (mehrere Videos)
-- [ ] Export-Presets (YouTube, Instagram, TikTok)
+### Version 1.5 (SaaS Launch - GCP) ☁️
+- [ ] **Google Cloud Platform Deployment** - Serverless Production
+  - Cloud Run (always-on API, ~$10/month)
+  - Cloud Run Jobs (on-demand workers, $0 idle, no timeout limits)
+  - Firebase Hosting (frontend)
+  - Cloud Storage (videos/highlights)
+  - Firestore (task state, user data)
+  - Cloud Tasks (job queue)
+- [ ] **Infinite Auto-Scaling**
+  - 0 → 1000+ concurrent jobs
+  - Pay-per-use: ~$0.19/video ($0.10 compute + $0.09 APIs)
+  - Per-job cost tracking & analytics
+- [ ] **Push Notifications**
+  - Browser push (PWA)
+  - Mobile app notifications (Firebase Cloud Messaging)
+  - Email alerts
+- [ ] **Multi-Tenant Architecture**
+  - Firebase Authentication
+  - User isolation & rate limiting
+  - Storage quotas
+- [ ] **Performance Monitoring Dashboard**
+- [ ] **Export Presets** (YouTube, Instagram, TikTok)
+- [ ] **Best for:** Startup SaaS, bursty workloads, global users, unlimited growth
 
 ### Version 2.0 (Advanced CV - Option B)
 - [ ] Motion Detection (Optical Flow)
@@ -484,22 +496,17 @@ docker-compose up
 - [ ] Slow-Motion für Top-Highlights
 - [ ] Object Tracking (Rider Detection)
 
-### Version 2.5 (Cloud-Native - GCP) ☁️
-- [ ] **Google Cloud Platform Deployment**
-  - Cloud Run (Serverless API)
-  - Cloud Run Jobs (Worker - no timeout limits)
-  - Cloud Storage (Videos/Highlights)
-  - Firestore (Task state)
-  - Firebase Cloud Messaging (Push notifications)
-- [ ] **Infinite Scalability**
-  - 0 → 1000+ concurrent jobs
-  - Pay-per-use: ~$0.19/video
-  - Per-job cost tracking
-- [ ] **Push Notifications**
-  - Mobile app notifications
-  - Browser push (PWA)
-  - Email alerts
-- [ ] **Ideal für:** Bursty workloads, >1000 videos/month, global users
+### Version 2.5 (Self-Hosted - VServer) 🖥️
+- [ ] **Dedicated Server Deployment** (Alternative to GCP)
+  - Celery + Redis Task Queue
+  - 4 parallel workers on 8 vCPU, 16GB RAM server
+  - Performance: 16-24 videos/hour (10 min videos each)
+  - Cost: $80-160/month base + $0.12/video at scale (667+ videos/month)
+- [ ] **Horizontal Scaling**
+  - Manual server upgrades
+  - Task retry & prioritization
+  - Worker monitoring dashboard
+- [ ] **Best for:** Self-hosted deployments, data sovereignty, predictable costs at scale
 
 ### Version 3.0 (Multi-Video & Professional)
 - [ ] Multi-Camera-Support mit Auto-Angle-Selection

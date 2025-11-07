@@ -13,7 +13,71 @@ Complete guide for deploying the MTB Video Editor across different infrastructur
 |------------|-------|------------|------------|-------------|---------|----------|
 | **Local (Current)** | ✅ Simple | $0 | $0.09 | 1 video at a time | ❌ None | MVP testing, < 10 videos/month |
 | **VServer + Celery** | ⚠️ Medium | $80-160 | $0.12 | 4 parallel, 16-24/hour | ⚠️ Manual | 100-1000 videos/month, predictable load |
-| **GCP Cloud Run** | ⚠️⚠️ Complex | $0 | $0.19 | Unlimited, 1000+/hour | ✅ Automatic | > 1000 videos/month, bursty loads |
+| **GCP Cloud Run** | ⚠️⚠️ Complex | $16-23 | $0.19 | Unlimited, 1000+/hour | ✅ Automatic | > 1000 videos/month, bursty loads |
+
+---
+
+## 🎯 Recommendation for Action Cut SaaS
+
+### TL;DR: Local MVP → GCP Production
+
+**For Action Cut as a SaaS platform**, the recommended deployment path is:
+
+```
+Phase 1: Local Testing (v0.5-1.0)
+  ↓
+Phase 2: GCP Production (v1.5+)
+```
+
+### Why GCP for SaaS?
+
+| Aspect | GCP Cloud Run | VServer (Alternative) |
+|--------|---------------|----------------------|
+| **Base Cost** | $16-23/month | $80-160/month |
+| **Idle Cost** | $0 (workers) | Same (always running) |
+| **Scaling** | Automatic 0 → 1000+ | Manual, limited by hardware |
+| **Cold Starts** | ~5-10s (acceptable with notifications) | None (always warm) |
+| **Setup** | Complex initial, zero maintenance | Medium setup, ongoing maintenance |
+| **Best For** | Startups, bursty workloads, unlimited growth | Predictable load, self-hosted |
+
+### Cost Analysis for SaaS Business Model
+
+With **pay-as-you-go pricing** ($1-3 profit per video):
+
+```
+GCP Production Costs:
+- Firebase Hosting (Frontend):        $2/month
+- Cloud Run API (always-on, min 1):  $10/month
+- Cloud Storage (50GB videos):         $1/month
+- Firestore (free tier):               $0/month
+- Cloud Tasks (job queue):         ~$0.40/month
+- Workers (on-demand):                 $0/month (idle)
+                                    -----------
+Total Base Cost:                   ~$13-23/month
+
+Per Video Variable Cost:
+- Cloud Run Job compute (4 vCPU, 10 min):  $0.10
+- OpenAI APIs (GPT-4o-mini + Whisper):     $0.09
+                                          ------
+Total per video:                           $0.19
+
+Profit Margin Examples:
+- Charging $1/video:  $0.81 profit (427% margin) ✅
+- Charging $2/video:  $1.81 profit (952% margin) ✅
+- Charging $3/video:  $2.81 profit (1479% margin) ✅
+```
+
+**Monthly Examples:**
+
+| Videos/Month | GCP Cost | Revenue ($2/video) | Profit | Margin |
+|--------------|----------|-------------------|--------|--------|
+| 0 | $13 | $0 | -$13 | - |
+| 50 | $22.50 | $100 | $77.50 | 344% |
+| 100 | $32 | $200 | $168 | 525% |
+| 500 | $108 | $1,000 | $892 | 826% |
+| 1,000 | $203 | $2,000 | $1,797 | 886% |
+
+**Recommendation:** GCP provides excellent profit margins while eliminating infrastructure management and enabling unlimited growth.
 
 ---
 
