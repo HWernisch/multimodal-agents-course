@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import BackgroundAnimation from '@/components/BackgroundAnimation';
 import MTBHighlightGenerator from '@/components/MTBHighlightGenerator';
+import HighlightLibrary from '@/components/HighlightLibrary';
 import VideoSidebar from '@/components/VideoSidebar';
-import { Film, MessageSquare } from 'lucide-react';
+import { Film, MessageSquare, Library, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,6 +19,7 @@ interface UploadedVideo {
 
 const MTBEditor = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'generator' | 'library'>('generator');
   const [uploadedVideos, setUploadedVideos] = useState<UploadedVideo[]>([]);
   const [activeVideo, setActiveVideo] = useState<UploadedVideo | null>(null);
   const [isProcessingVideo, setIsProcessingVideo] = useState(false);
@@ -139,9 +141,34 @@ const MTBEditor = () => {
     setActiveVideo(video);
   };
 
-  const removeVideo = (videoId: string) => {
+  const removeVideo = async (videoId: string) => {
     const videoToRemove = uploadedVideos.find(v => v.id === videoId);
-    if (videoToRemove) {
+    if (!videoToRemove) return;
+
+    try {
+      // Delete from server if it has a videoPath
+      if (videoToRemove.videoPath) {
+        const response = await fetch(`http://localhost:8080/media/${videoToRemove.videoPath}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          console.error('Failed to delete video from server:', await response.text());
+          // Continue with UI cleanup even if server deletion fails
+        } else {
+          console.log('🚵 Video deleted from server:', videoToRemove.videoPath);
+        }
+      }
+
+      // Clean up UI
+      URL.revokeObjectURL(videoToRemove.url);
+      setUploadedVideos(prev => prev.filter(v => v.id !== videoId));
+      if (activeVideo?.id === videoId) {
+        setActiveVideo(null);
+      }
+    } catch (error) {
+      console.error('🚵 Error deleting video:', error);
+      // Continue with UI cleanup even if error occurs
       URL.revokeObjectURL(videoToRemove.url);
       setUploadedVideos(prev => prev.filter(v => v.id !== videoId));
       if (activeVideo?.id === videoId) {
@@ -178,91 +205,126 @@ const MTBEditor = () => {
               <span className="hidden sm:inline">Chat Mode</span>
             </Button>
           </div>
+
+          {/* Tabs */}
+          <div className="flex border-t border-zinc-800">
+            <button
+              onClick={() => setActiveTab('generator')}
+              className={`flex-1 py-3 sm:py-4 flex items-center justify-center gap-2 transition-colors touch-manipulation ${
+                activeTab === 'generator'
+                  ? 'bg-red-900/20 border-b-2 border-red-500 text-red-500'
+                  : 'text-zinc-400 hover:text-zinc-300 hover:bg-zinc-900'
+              }`}
+            >
+              <Zap className="w-5 h-5" />
+              <span className="text-sm sm:text-base font-semibold">Generator</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('library')}
+              className={`flex-1 py-3 sm:py-4 flex items-center justify-center gap-2 transition-colors touch-manipulation ${
+                activeTab === 'library'
+                  ? 'bg-red-900/20 border-b-2 border-red-500 text-red-500'
+                  : 'text-zinc-400 hover:text-zinc-300 hover:bg-zinc-900'
+              }`}
+            >
+              <Library className="w-5 h-5" />
+              <span className="text-sm sm:text-base font-semibold">Library</span>
+            </button>
+          </div>
         </header>
 
         {/* Main Content - Mobile Scrollable */}
         <div className="flex-1 overflow-y-auto">
-          {/* Desktop: Show sidebar, Mobile: Hide */}
-          <div className="hidden lg:block">
-            <div className="pr-96">
-              <div className="p-4 sm:p-6">
-                <MTBHighlightGenerator
-                  videoPath={activeVideo?.videoPath}
-                  videoName={activeVideo?.file.name}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile: Full width, no sidebar */}
-          <div className="lg:hidden">
-            <div className="p-4">
-              {/* Mobile Video Selector */}
-              {uploadedVideos.length > 0 && (
-                <div className="mb-6 space-y-3">
-                  <label className="text-sm font-semibold text-zinc-400">
-                    Select Video ({uploadedVideos.length})
-                  </label>
-                  <div className="grid gap-2">
-                    {uploadedVideos.map((video) => (
-                      <button
-                        key={video.id}
-                        onClick={() => selectVideo(video)}
-                        className={`p-3 rounded-lg border-2 transition-all touch-manipulation ${
-                          activeVideo?.id === video.id
-                            ? 'border-red-500 bg-red-900/20'
-                            : 'border-zinc-800 hover:border-zinc-700'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 text-left">
-                            <p className="text-sm font-semibold truncate">{video.file.name}</p>
-                            <p className="text-xs text-zinc-400">
-                              {video.processingStatus === 'completed' && '✓ Ready'}
-                              {video.processingStatus === 'in_progress' && '⏳ Processing...'}
-                              {video.processingStatus === 'failed' && '✗ Failed'}
-                            </p>
-                          </div>
-                          {activeVideo?.id === video.id && (
-                            <div className="w-2 h-2 rounded-full bg-red-500 ml-2" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
+          {activeTab === 'generator' ? (
+            <>
+              {/* Desktop: Show sidebar, Mobile: Hide */}
+              <div className="hidden lg:block">
+                <div className="pr-96">
+                  <div className="p-4 sm:p-6">
+                    <MTBHighlightGenerator
+                      videoPath={activeVideo?.videoPath}
+                      videoName={activeVideo?.file.name}
+                    />
                   </div>
                 </div>
-              )}
-
-              {/* Upload Button for Mobile */}
-              <div className="mb-6">
-                <Button
-                  onClick={() => document.getElementById('mobile-video-upload')?.click()}
-                  variant="outline"
-                  className="w-full h-12 border-dashed border-2 border-zinc-700 hover:border-red-500 touch-manipulation"
-                  disabled={isProcessingVideo}
-                >
-                  <Film className="w-5 h-5 mr-2" />
-                  {isProcessingVideo ? 'Uploading...' : 'Upload MTB Video'}
-                </Button>
-                <input
-                  id="mobile-video-upload"
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleVideoUpload(file);
-                  }}
-                  className="hidden"
-                />
               </div>
 
-              {/* Highlight Generator */}
-              <MTBHighlightGenerator
-                videoPath={activeVideo?.videoPath}
-                videoName={activeVideo?.file.name}
-              />
+              {/* Mobile: Full width, no sidebar */}
+              <div className="lg:hidden">
+                <div className="p-4">
+                  {/* Mobile Video Selector */}
+                  {uploadedVideos.length > 0 && (
+                    <div className="mb-6 space-y-3">
+                      <label className="text-sm font-semibold text-zinc-400">
+                        Select Video ({uploadedVideos.length})
+                      </label>
+                      <div className="grid gap-2">
+                        {uploadedVideos.map((video) => (
+                          <button
+                            key={video.id}
+                            onClick={() => selectVideo(video)}
+                            className={`p-3 rounded-lg border-2 transition-all touch-manipulation ${
+                              activeVideo?.id === video.id
+                                ? 'border-red-500 bg-red-900/20'
+                                : 'border-zinc-800 hover:border-zinc-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 text-left">
+                                <p className="text-sm font-semibold truncate">{video.file.name}</p>
+                                <p className="text-xs text-zinc-400">
+                                  {video.processingStatus === 'completed' && '✓ Ready'}
+                                  {video.processingStatus === 'in_progress' && '⏳ Processing...'}
+                                  {video.processingStatus === 'failed' && '✗ Failed'}
+                                </p>
+                              </div>
+                              {activeVideo?.id === video.id && (
+                                <div className="w-2 h-2 rounded-full bg-red-500 ml-2" />
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Upload Button for Mobile */}
+                  <div className="mb-6">
+                    <Button
+                      onClick={() => document.getElementById('mobile-video-upload')?.click()}
+                      variant="outline"
+                      className="w-full h-12 border-dashed border-2 border-zinc-700 hover:border-red-500 touch-manipulation"
+                      disabled={isProcessingVideo}
+                    >
+                      <Film className="w-5 h-5 mr-2" />
+                      {isProcessingVideo ? 'Uploading...' : 'Upload MTB Video'}
+                    </Button>
+                    <input
+                      id="mobile-video-upload"
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleVideoUpload(file);
+                      }}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* Highlight Generator */}
+                  <MTBHighlightGenerator
+                    videoPath={activeVideo?.videoPath}
+                    videoName={activeVideo?.file.name}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Highlight Library */
+            <div className="p-4 sm:p-6">
+              <HighlightLibrary />
             </div>
-          </div>
+          )}
         </div>
 
         {/* Mobile Bottom Info Bar */}

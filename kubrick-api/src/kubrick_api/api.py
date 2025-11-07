@@ -278,6 +278,129 @@ async def serve_media(file_path: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.delete("/media/{file_path:path}")
+async def delete_media(file_path: str):
+    """
+    Delete a video or highlight file from shared_media directory.
+
+    Supports deleting:
+    - Original videos: /media/video.mp4
+    - Highlights: /media/highlights/video_highlights_....mp4
+    """
+    try:
+        # Support both formats: with or without "shared_media/" prefix
+        if file_path.startswith("shared_media/"):
+            relative_path = file_path.replace("shared_media/", "")
+        else:
+            relative_path = file_path
+
+        media_file = Path("shared_media") / relative_path
+
+        if not media_file.exists():
+            raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
+
+        # Security check: ensure file is within shared_media directory
+        if not str(media_file.resolve()).startswith(str(Path("shared_media").resolve())):
+            raise HTTPException(status_code=403, detail="Access denied")
+
+        media_file.unlink()
+        logger.info(f"Deleted file: {media_file}")
+
+        return {"message": "File deleted successfully", "file_path": file_path}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting media file {file_path}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/highlights")
+async def list_highlights():
+    """
+    List all saved highlight videos with metadata.
+
+    Returns list of highlights with:
+    - filename: Name of the highlight file
+    - path: Relative path (for API calls)
+    - size: File size in bytes
+    - created: Creation timestamp
+    - original_video: Name of the source video (parsed from filename)
+    """
+    try:
+        highlights_dir = Path("shared_media/highlights")
+        highlights_dir.mkdir(parents=True, exist_ok=True)
+
+        highlights = []
+
+        for file in sorted(highlights_dir.glob("*.mp4"), key=lambda f: f.stat().st_mtime, reverse=True):
+            # Parse filename: {original}_highlights_{timestamp}_{uuid}.mp4
+            filename = file.name
+            original_video = filename.split("_highlights_")[0] if "_highlights_" in filename else "unknown"
+
+            highlights.append({
+                "filename": filename,
+                "path": f"highlights/{filename}",
+                "size": file.stat().st_size,
+                "size_mb": round(file.stat().st_size / (1024 * 1024), 2),
+                "created": file.stat().st_mtime,
+                "original_video": original_video
+            })
+
+        return {
+            "highlights": highlights,
+            "count": len(highlights),
+            "total_size_mb": round(sum(h["size"] for h in highlights) / (1024 * 1024), 2)
+        }
+    except Exception as e:
+        logger.error(f"Error listing highlights: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/storage-info")
+async def get_storage_info():
+    """
+    Get storage information about shared_media directory.
+
+    Returns:
+    - total_files: Number of files
+    - total_size_mb: Total size in MB
+    - videos_count: Number of original videos
+    - videos_size_mb: Size of original videos
+    - highlights_count: Number of highlights
+    - highlights_size_mb: Size of highlights
+    """
+    try:
+        shared_media = Path("shared_media")
+        highlights_dir = shared_media / "highlights"
+
+        # Count videos (root level, excluding highlights folder)
+        videos = [f for f in shared_media.glob("*.mp4") if f.is_file()]
+        videos_size = sum(f.stat().st_size for f in videos)
+
+        # Count highlights
+        highlights_dir.mkdir(parents=True, exist_ok=True)
+        highlights = list(highlights_dir.glob("*.mp4"))
+        highlights_size = sum(f.stat().st_size for f in highlights)
+
+        total_size = videos_size + highlights_size
+
+        return {
+            "total_files": len(videos) + len(highlights),
+            "total_size_mb": round(total_size / (1024 * 1024), 2),
+            "videos": {
+                "count": len(videos),
+                "size_mb": round(videos_size / (1024 * 1024), 2)
+            },
+            "highlights": {
+                "count": len(highlights),
+                "size_mb": round(highlights_size / (1024 * 1024), 2)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting storage info: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @click.command()
 @click.option("--port", default=8080, help="FastAPI server port")
 @click.option("--host", default="0.0.0.0", help="FastAPI server host")
