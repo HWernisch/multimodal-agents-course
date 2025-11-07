@@ -90,9 +90,12 @@ class ActionScore:
             has_impact=has_impact,
         )
 
+        # Calculate dynamic clip duration based on action type and score
+        clip_duration = _calculate_dynamic_duration(action_type, overall_score)
+
         return cls(
             timestamp=timestamp,
-            duration=3.0,  # Default clip duration (can be adjusted later)
+            duration=clip_duration,
             motion_score=motion_score,
             action_type_score=action_type_score,
             excitement_score=excitement_score,
@@ -320,6 +323,55 @@ def _compute_overall_score(
 
     # Clamp to 0-100 range
     return min(100.0, max(0.0, overall))
+
+
+def _calculate_dynamic_duration(action_type: str, overall_score: float) -> float:
+    """
+    Calculate clip duration based on action type and overall score.
+
+    Different action types warrant different clip lengths:
+    - Jumps/Tricks: Shorter (quick moments)
+    - Downhill/Riding: Longer (sustained action)
+    - Crashes: Very short (impact moment)
+
+    High scores get a 20% duration boost, low scores get 20% reduction.
+
+    Args:
+        action_type: Type of action (jumping/trick/crash/riding/downhill/scenic/stationary)
+        overall_score: Overall action score (0-100)
+
+    Returns:
+        Clip duration in seconds, clamped between 2.0 and 10.0 seconds
+    """
+    # Base duration map - tuned for MTB action viewing
+    base_duration_map = {
+        "jumping": 2.5,      # Quick moment - show the jump
+        "trick": 3.5,        # Slightly longer to see setup + landing
+        "crash": 2.0,        # Short and impactful
+        "riding": 4.5,       # Flow sections need more time
+        "downhill": 6.0,     # Fast descents are exciting - show more
+        "scenic": 4.0,       # Establish context, not too long
+        "stationary": 2.0,   # Minimal time for static shots
+    }
+
+    # Get base duration (default to 4.0 if action type unknown)
+    base_duration = base_duration_map.get(action_type, 4.0)
+
+    # Scale by score quality
+    if overall_score >= 80:
+        # Top-tier action - show it longer (+20%)
+        duration = base_duration * 1.2
+    elif overall_score < 60:
+        # Lower quality - trim it shorter (-20%)
+        duration = base_duration * 0.8
+    else:
+        # Medium quality - use base duration
+        duration = base_duration
+
+    # Clamp to sensible range (2-10 seconds)
+    # 2s minimum: Anything shorter feels too rushed
+    # 10s maximum: Avoid dragging out single clips
+    return max(2.0, min(10.0, duration))
 
 
 # === Highlight Detection ===
