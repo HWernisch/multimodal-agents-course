@@ -662,6 +662,294 @@ const response = await fetch('/upload-video', {
 
 ---
 
+## Asynchronous Processing & Limitations
+
+### How Async Processing Works
+
+All video processing and highlight generation endpoints use **asynchronous background tasks**:
+
+```
+User Request → Immediate Response (task_id) → Background Processing → Poll for Status
+```
+
+**Flow:**
+1. User calls `/generate-mtb-highlight` or `/process-video`
+2. API immediately returns `task_id` and `status: "in_progress"`
+3. Task runs in background (user can close browser/app)
+4. Frontend polls `/task-status/{task_id}` every 2-3 seconds
+5. When `status: "completed"`, result is available
+
+**Benefits:**
+- ✅ No frontend timeouts (request completes in < 1 second)
+- ✅ User can navigate away and come back
+- ✅ Progress tracking via polling
+- ✅ Multiple tasks can run concurrently
+
+**Implementation:**
+- Uses FastAPI `BackgroundTasks` for MVP
+- Tasks run in same worker process as API
+- Task state stored in-memory (lost on server restart)
+
+---
+
+### Current Limitations (v0.5.0)
+
+#### 1. Worker Blocking for Long Videos
+
+Background tasks run in the **same FastAPI worker** as API endpoints:
+
+| Video Length | Processing Time | Impact on API |
+|--------------|-----------------|---------------|
+| 1-2 minutes | 2-4 minutes | ✅ Minimal - no issues |
+| 5 minutes | 5-10 minutes | ⚠️ Worker partially blocked |
+| 10 minutes | 10-20 minutes | ⚠️⚠️ Worker significantly blocked |
+| 30+ minutes | 30-60 minutes | ❌ Unacceptable - API may become unresponsive |
+
+**What happens during long processing:**
+- Other API requests (upload, delete, list) may be delayed
+- With multiple simultaneous generations, queue builds up
+- Worker resources (CPU, memory) are consumed
+- **However:** No timeout for the user - task completes successfully
+
+**Recommendation:**
+- **MVP/Local Testing:** Current implementation is fine for videos < 10 minutes
+- **Production/Multi-User:** Upgrade to dedicated task queue (see below)
+
+---
+
+#### 2. Task State Persistence
+
+Current implementation stores task state **in-memory**:
+
+```python
+bg_task_states[task_id] = {
+    "status": "in_progress",
+    "message": "Analyzing video..."
+}
+```
+
+**Implications:**
+- ❌ Task state lost on server restart
+- ❌ Cannot query tasks from other worker instances
+- ❌ No task history after completion
+
+**Workaround:**
+- Poll frequently and cache results in frontend
+- Server restarts during development will lose active tasks
+
+---
+
+#### 3. Concurrent Task Limits
+
+No explicit limit on concurrent background tasks:
+
+**Current behavior:**
+- All tasks queued in FastAPI BackgroundTasks
+- Executed sequentially (one at a time per worker)
+- With Uvicorn default config (1 worker): Only 1 task processing at a time
+
+**Impact:**
+- User A starts 10-minute video → User B must wait until completion
+- No task prioritization
+- No way to cancel running tasks
+
+---
+
+### Timeout Behavior
+
+#### Frontend → API: ✅ No Timeout Risk
+
+Requests complete immediately:
+```javascript
+// This completes in < 1 second
+const response = await fetch('/generate-mtb-highlight', {
+  method: 'POST',
+  body: JSON.stringify({ video_path, target_duration_seconds })
+});
+
+const { task_id } = await response.json();
+// ✅ Got task_id, no timeout possible
+```
+
+Polling is safe:
+```javascript
+// Each poll is a separate request (< 1 second each)
+while (true) {
+  const status = await fetch(`/task-status/${task_id}`);
+  // ✅ No cumulative timeout
+  await sleep(2000);
+}
+```
+
+---
+
+#### API → MCP Server: ⚠️ Potential Timeout
+
+The background task calls MCP tools which can run for 10-20+ minutes:
+
+```python
+# This can take 10-20 minutes for long videos
+result = await client.call_tool(
+    "generate_mtb_highlight_reel",
+    video_path=video_path,
+    ...
+)
+```
+
+**Current MCP Client Config:**
+- No explicit timeout configured
+- Likely defaults to system TCP timeout (very high)
+- Should handle 30+ minute videos
+
+**If timeout occurs:**
+- Task status becomes `"failed"`
+- Error message available via `/task-status/{task_id}`
+- Video file remains intact (no corruption)
+
+---
+
+### Production Scaling Recommendations
+
+For production deployment with multiple users or long videos (10+ minutes), upgrade to a **dedicated task queue**:
+
+#### Option 1: Celery + Redis (Recommended)
+
+**Architecture:**
+```
+FastAPI API (Port 8080)
+    ↓ Enqueue task
+Redis (Port 6379) - Task broker
+    ↓ Fetch task
+Celery Workers (1-4 workers) - Process videos
+    ↓ Store result
+Redis - Result backend
+    ↑ Query result
+FastAPI API - Return to user
+```
+
+**Benefits:**
+- ✅ Separate worker processes (no API blocking)
+- ✅ Horizontal scaling (add more workers)
+- ✅ Task retry on failure
+- ✅ Task prioritization
+- ✅ Persistent task state
+- ✅ Monitoring via Flower dashboard
+
+**Setup:**
+```python
+# Install
+pip install celery redis
+
+# celery_tasks.py
+from celery import Celery
+celery_app = Celery('mtb_editor', broker='redis://localhost:6379')
+
+@celery_app.task(time_limit=1800)  # 30 min timeout
+def generate_highlight_task(video_path, target_duration, ...):
+    result = client.call_tool("generate_mtb_highlight_reel", ...)
+    return result
+
+# api.py
+@app.post("/generate-mtb-highlight")
+async def generate_mtb_highlight(request: ...):
+    task = generate_highlight_task.delay(...)
+    return {"task_id": task.id}
+
+# Start worker
+celery -A celery_tasks worker --loglevel=info --concurrency=4
+```
+
+---
+
+#### Option 2: RQ (Redis Queue) - Simpler Alternative
+
+**Benefits:**
+- ✅ Simpler than Celery
+- ✅ Pure Python (no config files)
+- ✅ Good for moderate scale (< 10 concurrent users)
+
+**Setup:**
+```python
+# Install
+pip install rq
+
+# api.py
+from redis import Redis
+from rq import Queue
+
+redis_conn = Redis()
+q = Queue(connection=redis_conn)
+
+@app.post("/generate-mtb-highlight")
+async def generate_mtb_highlight(request: ...):
+    job = q.enqueue(
+        generate_highlight_function,
+        video_path=request.video_path,
+        timeout='30m'
+    )
+    return {"task_id": job.id}
+
+# Start worker
+rq worker --url redis://localhost:6379
+```
+
+---
+
+#### Option 3: AWS/GCP Cloud Tasks
+
+For cloud deployment:
+- AWS SQS + Lambda
+- Google Cloud Tasks + Cloud Run
+- Azure Queue Storage + Functions
+
+---
+
+### When to Upgrade?
+
+**Keep current implementation if:**
+- ✅ Videos are typically < 5 minutes
+- ✅ Single user or < 3 concurrent users
+- ✅ Local/development deployment
+- ✅ MVP testing phase
+
+**Upgrade to task queue if:**
+- ⚠️ Videos are 10+ minutes regularly
+- ⚠️ Multiple concurrent users (> 5)
+- ⚠️ Production deployment
+- ⚠️ Need task persistence across restarts
+- ⚠️ Want to scale horizontally
+
+---
+
+### Monitoring Tips
+
+**Check active background tasks:**
+```bash
+# View API logs
+docker-compose logs -f kubrick-api | grep "Generating MTB highlight"
+
+# Monitor worker CPU/memory
+docker stats kubrick-api
+```
+
+**Estimate processing time:**
+```
+Estimated time = video_duration_minutes * 1.5
+
+Examples:
+- 2 min video → ~3 min processing
+- 5 min video → ~7.5 min processing
+- 10 min video → ~15 min processing
+```
+
+**If processing takes too long:**
+1. Check MCP server logs: `docker-compose logs kubrick-mcp`
+2. Verify video file isn't corrupted
+3. Lower frame count in settings (45 → 30)
+4. Use FFmpeg assembly method (faster than MoviePy)
+
+---
+
 ## Example Workflows
 
 ### Complete Workflow: Upload → Process → Generate → Download

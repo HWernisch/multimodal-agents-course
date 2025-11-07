@@ -288,6 +288,24 @@ frames_view = video_table.select(
 
 **Beispiel:** 10-Minuten-Video → ~$0.09 (9 Cent) 💰
 
+### Asynchrone Verarbeitung & Limitierungen
+
+**Verarbeitung läuft asynchron:**
+- ✅ Keine Browser-Timeouts (Request beendet sofort mit `task_id`)
+- ✅ Frontend kann weiterarbeiten während Video verarbeitet wird
+- ✅ Status-Polling alle 2-3 Sekunden zeigt Fortschritt
+
+**Aktuelle Limitierungen (v0.5.0):**
+- Background Tasks laufen im selben FastAPI Worker
+- Bei langen Videos (> 10 Min) kann Worker blockiert werden
+- Nur ein Video wird gleichzeitig verarbeitet (Single Worker)
+
+**Empfehlungen:**
+- **MVP/Testing:** Aktuelle Lösung funktioniert gut für Videos < 10 Minuten
+- **Production:** Für Videos > 10 Min oder mehrere User → Upgrade auf Celery + Redis empfohlen
+
+📖 **Details:** Siehe [API_DOCUMENTATION.md - Asynchronous Processing](API_DOCUMENTATION.md#asynchronous-processing--limitations)
+
 ---
 
 ## 🛠️ Entwicklung

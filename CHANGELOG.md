@@ -251,15 +251,31 @@ MVP (Version 0.5) is complete and ready for testing. All core features for autom
 ## Known Issues
 
 ### Current Limitations
+
+**Feature Limitations:**
 - No motion detection yet (planned for v2.0)
 - No pose detection for trick recognition (planned for v2.0)
 - No beat synchronization with music (planned for v2.0)
 - Caption-based detection may miss some fast actions (addressed by audio intensity)
 
+**Performance & Scaling (v0.5.0):**
+- Background tasks run in same FastAPI worker (worker blocking for long videos)
+- Task state stored in-memory (lost on server restart)
+- No concurrent task limits (tasks processed sequentially)
+- Single worker processes one video at a time
+
+**Impact:**
+- ✅ **Videos < 5 minutes:** No issues, works great for MVP/testing
+- ⚠️ **Videos 5-10 minutes:** Worker partially blocked, acceptable for single user
+- ❌ **Videos > 10 minutes:** Worker significantly blocked, upgrade recommended for production
+
+**See [API_DOCUMENTATION.md - Asynchronous Processing & Limitations](API_DOCUMENTATION.md#asynchronous-processing--limitations) for detailed explanation.**
+
 ### Workarounds
 - Lower `min_action_score` if no clips found (try 40-50 instead of 60)
 - Use FFmpeg assembly method for faster processing
 - Process longer videos in chunks if memory limited
+- For production: Upgrade to Celery + Redis task queue (see API docs)
 
 ---
 
