@@ -32,20 +32,44 @@ Die KI erkennt automatisch:
 
 ## ✨ Features
 
-### MVP (Version 1.0 - Option A)
+### MVP (Version 0.5 - Complete) ✅
+**Core Highlight Generation:**
 - ✅ **Automatische Action-Erkennung** via KI-Caption-Analyse
 - ✅ **Audio-Intensitäts-Analyse** (Lautstärke, Peaks, Impact-Sounds)
 - ✅ **Intelligentes Action-Scoring** (0-100 Punkte pro Szene)
+- ✅ **Intelligente Clip-Dauer** - Dynamisch basierend auf Action-Type & Score
+  - Jumps: 2.5s, Downhill: 6.0s, Riding: 4.5s, Tricks: 3.5s
+  - +20% Dauer für Top-Scores (≥80), -20% für niedrige Scores (<60)
 - ✅ **Flexible Ziellänge** (15 Sekunden bis 5 Minuten)
 - ✅ **Automatische Clip-Auswahl** mit Diversitäts-Algorithmus
 - ✅ **Video-Assembly** mit optionalen Transitions (Fades)
-- ✅ **Web-UI** für einfachen Upload und Download
 
-### Geplant (Version 2.0 - Option B)
+**User Interface:**
+- ✅ **Mobile-First UI** - Touch-optimierte Bedienung für Smartphone/Tablet
+- ✅ **MTB Highlight Generator** - Intuitive Sliders für Dauer & Action-Score
+- ✅ **Highlight Library** - Browse, verwalte und downloade alle Highlights
+- ✅ **Storage Dashboard** - Übersicht über Speichernutzung
+- ✅ **Tab-Navigation** - Wechsel zwischen Generator und Library
+
+**Video Management:**
+- ✅ **Multi-Video Upload** - Mehrere Videos gleichzeitig verwalten
+- ✅ **Video-Bibliothek** - Alle hochgeladenen Videos im Überblick
+- ✅ **Manuelles Löschen** - Volle Kontrolle über Videos & Highlights (kein Auto-Delete)
+- ✅ **Download-Funktion** - Fertige Highlights direkt herunterladen
+
+### Version 1.0 (Stable Release) - In Planung
+- 🔄 **Umfassendes Testing** mit echten MTB-Videos
+- 🔄 **Performance-Optimierungen** (parallele Frame-Verarbeitung)
+- 🔄 **Preset-Profile** ("Extreme Action", "Balanced", "Cinematic")
+- 🔄 **Clip-Preview** vor finalem Export
+
+### Version 2.0 (Advanced CV - Option B) - Zukunft
 - 🔄 **Motion Detection** via Optical Flow (präzisere Geschwindigkeitserkennung)
 - 🔄 **Pose Detection** für Trick-Erkennung (MediaPipe/YOLO)
 - 🔄 **Beat-Synchronisierung** mit eigener Musik
 - 🔄 **Multi-Camera-Support** für verschiedene Perspektiven
+- 🔄 **Automatisches Color-Grading**
+- 🔄 **Slow-Motion** für Top-Highlights
 
 ---
 
@@ -401,32 +425,49 @@ docker-compose up
 
 ## 🔮 Roadmap
 
-### Version 1.0 (MVP) - ✅ In Entwicklung
+### Version 0.5 (MVP) - ✅ COMPLETED
 - [x] Technischer Plan
-- [ ] Caption-basierte Action-Erkennung
-- [ ] Audio-Intensitäts-Analyse
-- [ ] Action-Scoring-System
-- [ ] Video-Assembly-Engine
-- [ ] Web-UI für Highlight-Generierung
+- [x] Caption-basierte Action-Erkennung
+- [x] Audio-Intensitäts-Analyse
+- [x] Action-Scoring-System mit intelligenter Clip-Dauer
+- [x] Video-Assembly-Engine (FFmpeg + MoviePy)
+- [x] Mobile-First UI für Highlight-Generierung
+- [x] Highlight Library & Video Management
+- [x] MCP Tools Integration
 
-### Version 1.5 (Verbesserungen)
+**Status:** Bereit für lokales Testing mit echten MTB-Videos!
+
+### Version 1.0 (Stable Release) - 🚧 Next
+- [ ] Umfassendes Testing mit realen MTB-Videos
 - [ ] Performance-Optimierung (Parallelisierung)
-- [ ] Bessere Diversitäts-Algorithmen
+- [ ] Bessere Error Messages & User Feedback
 - [ ] Preset-Profile ("Extreme Action", "Balanced", "Cinematic")
 - [ ] Clip-Preview vor finalem Export
+- [ ] Anpassbare Clip-Grenzen in UI
+- [ ] Dokumentation für Contributors
 
-### Version 2.0 (Option B - Advanced CV)
+### Version 1.5 (UX Improvements)
+- [ ] Custom Action-Type Weights in UI
+- [ ] Batch-Processing (mehrere Videos)
+- [ ] Export-Presets (YouTube, Instagram, TikTok)
+- [ ] Keyboard Shortcuts
+- [ ] Dark/Light Mode Toggle
+
+### Version 2.0 (Advanced CV - Option B)
 - [ ] Motion Detection (Optical Flow)
-- [ ] Pose Detection für Trick-Erkennung
+- [ ] Pose Detection für Trick-Erkennung (MediaPipe/YOLO)
 - [ ] Musik-Upload & Beat-Synchronisierung
 - [ ] Automatische Color-Grading
-- [ ] Slow-Motion für Highlights
+- [ ] Slow-Motion für Top-Highlights
+- [ ] Object Tracking (Rider Detection)
 
-### Version 3.0 (Multi-Video)
-- [ ] Multi-Camera-Support
-- [ ] Automatische Best-Angle-Auswahl
-- [ ] Batch-Processing (mehrere Videos)
-- [ ] Social-Media-Export (Instagram, TikTok Formate)
+### Version 3.0 (Multi-Video & Professional)
+- [ ] Multi-Camera-Support mit Auto-Angle-Selection
+- [ ] 360° Video Support
+- [ ] GPS Data Overlay (Speed, Elevation, Map)
+- [ ] Strava/Komoot Integration
+- [ ] Cloud Processing & Sharing
+- [ ] Collaborative Editing
 
 ---
 

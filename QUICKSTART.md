@@ -274,22 +274,38 @@ docker-compose exec kubrick-mcp ls -la /root/.pixeltable
 
 ## 📊 Entwicklungs-Status
 
-### ✅ Aktuell funktioniert:
-- Docker Container Setup
-- Video Upload
-- Video Verarbeitung (Frame-Extraktion, Captions, Audio-Transkription)
-- MCP Server & Client
-- Basic UI
+**Current Version:** 0.5.0 (MVP Complete)
+**Status:** ✅ Ready for Testing
 
-### 🚧 In Arbeit (MVP Phase 1-5):
-- [ ] Phase 1.1: MTB-spezifische Caption-Prompts
-- [ ] Phase 1.2: Audio-Intensitäts-Analyse
-- [ ] Phase 1.3: ActionScore-System
-- [ ] Phase 1.4: detect_action_highlights()
-- [ ] Phase 2: VideoAssembler
-- [ ] Phase 3: /generate-highlight API
-- [ ] Phase 4: Highlight-Generator UI
-- [ ] Phase 5: Testing mit MTB-Videos
+### ✅ Vollständig implementiert (MVP):
+**Backend:**
+- Docker Container Setup (3 Container: MCP, API, UI)
+- Video Upload & Processing Pipeline
+- Frame-Extraktion (45 Frames) mit MTB-spezifischen Captions
+- Audio-Intensitäts-Analyse (Librosa)
+- ActionScore-System (0-100 Punkte, 6 Faktoren)
+- Intelligente dynamische Clip-Dauer (action-type + score-basiert)
+- VideoAssembler (FFmpeg + MoviePy)
+- MCP Tools (detect_action_highlights, assemble_highlight_video, generate_mtb_highlight_reel)
+
+**API:**
+- POST `/generate-mtb-highlight` - Highlight-Generierung mit Background Tasks
+- GET `/highlights` - Liste aller gespeicherten Highlights
+- GET `/storage-info` - Speicher-Statistiken
+- DELETE `/media/{file_path}` - Videos/Highlights löschen
+
+**Frontend:**
+- Mobile-First UI mit Touch-Optimierung
+- MTB Highlight Generator (Sliders, Status-Tracking, Download)
+- Highlight Library (Browse, Manage, Delete)
+- Tab-Navigation (Generator ↔ Library)
+- Video-Bibliothek mit Upload-Funktion
+
+### 🧪 Als Nächstes:
+- Lokales Testing mit echten MTB-Videos
+- Performance-Optimierungen
+- Bug-Fixes basierend auf User-Feedback
+- Vorbereitung für v1.0 Stable Release
 
 ---
 
