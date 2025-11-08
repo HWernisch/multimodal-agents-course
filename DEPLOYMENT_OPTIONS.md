@@ -669,6 +669,99 @@ def route_task(video_path, queue_depth):
 
 ---
 
+## Future: Version 2.0 - YOLO Hybrid Architecture (GCP + GPU)
+
+### Overview
+
+Version 2.0 introduces **YOLO-based pre-filtering** to improve quality while reducing costs:
+
+```
+┌──────────────────────────────────────────────────┐
+│  3-Track Processing Pipeline                     │
+│                                                   │
+│  Track 1: YOLO (GPU)                             │
+│  ├─ All frames (~3000 for 10min @ 5fps)         │
+│  ├─ Object detection: rider, bike, pose         │
+│  ├─ Metrics: air time, lean angle, speed        │
+│  └─ Cost: $0.05 (NVIDIA L4 GPU, 3-5 min)        │
+│                                                   │
+│  Track 2: GPT-4o-mini (Action)                   │
+│  ├─ Top 50 YOLO action frames                   │
+│  ├─ Semantic analysis: trick type, excitement   │
+│  └─ Cost: $0.10                                  │
+│                                                   │
+│  Track 3: GPT-4o-mini (Scenery)                  │
+│  ├─ 30 sampled low-action frames                │
+│  ├─ Detect beautiful landscapes for transitions │
+│  └─ Cost: $0.06                                  │
+│                                                   │
+│  Audio: Whisper transcription                    │
+│  └─ Cost: $0.06                                  │
+│                                                   │
+│  Total: $0.27/video (25% cheaper than v0.5!)    │
+└──────────────────────────────────────────────────┘
+```
+
+### Cost Comparison
+
+| Version | Frames Analyzed | AI Cost | Quality | Processing Time |
+|---------|----------------|---------|---------|-----------------|
+| **v0.5 (Current)** | 180 GPT-4o-mini | $0.36 | ⭐⭐⭐⭐ | 10-20 min |
+| **v2.0 (YOLO Hybrid)** | 3000 YOLO + 80 GPT | $0.27 | ⭐⭐⭐⭐⭐ | 5-10 min |
+
+### GCP Deployment with GPU
+
+**Cloud Run Job Configuration:**
+```bash
+gcloud run jobs create mtb-worker-yolo \
+  --image gcr.io/action-cut/yolo-worker \
+  --region us-central1 \
+  --gpu 1 \
+  --gpu-type nvidia-l4 \
+  --cpu 4 \
+  --memory 16Gi \
+  --max-retries 2 \
+  --task-timeout 30m \
+  --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY
+```
+
+**GPU Costs (GCP Pricing 2025):**
+```
+NVIDIA L4 GPU: $0.70/hour
+4 vCPU + 16GB: $0.10/hour
+─────────────────────────
+Total: $0.80/hour
+
+Processing 10-min video: ~4 minutes
+GPU cost per video: $0.80 × (4/60) = $0.053 ≈ $0.05
+```
+
+### Updated SaaS Profit Margins (v2.0)
+
+| Videos/Month | Total Cost | Revenue ($2/video) | Profit | Margin |
+|--------------|------------|-------------------|--------|--------|
+| 0 | $13 (base) | $0 | -$13 | - |
+| 50 | $26.50 | $100 | $73.50 | 277% |
+| 100 | $40 | $200 | $160 | 400% |
+| 500 | $148 | $1,000 | $852 | 576% |
+| 1,000 | $283 | $2,000 | $1,717 | 607% |
+
+### Benefits
+
+- ✅ **Better Quality:** YOLO detects jumps/tricks/crashes that GPT-4o-mini might miss
+- ✅ **Lower Cost:** 25% cheaper ($0.27 vs. $0.36/video)
+- ✅ **Scenery Detection:** Dedicated track for beautiful landscape shots
+- ✅ **Faster Processing:** 5-10 min vs. 10-20 min
+- ✅ **Scalable:** GPU workers scale 0 → 1000+ on demand
+
+### Challenges
+
+- ⚠️ **Complexity:** Requires GPU-enabled Cloud Run + YOLO training
+- ⚠️ **Training Data:** 500-1000 annotated MTB videos recommended for fine-tuning
+- ⚠️ **GPU Availability:** L4 GPUs limited in some regions
+
+---
+
 ## Conclusion
 
 | Priority | Recommendation |

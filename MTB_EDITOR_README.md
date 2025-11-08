@@ -488,13 +488,27 @@ docker-compose up
 - [ ] **Export Presets** (YouTube, Instagram, TikTok)
 - [ ] **Best for:** Startup SaaS, bursty workloads, global users, unlimited growth
 
-### Version 2.0 (Advanced CV - Option B)
-- [ ] Motion Detection (Optical Flow)
-- [ ] Pose Detection für Trick-Erkennung (MediaPipe/YOLO)
+### Version 2.0 (Advanced CV - YOLO Hybrid) 🤖
+- [ ] **YOLO Integration** - Hybrid 3-Track Processing
+  - YOLOv8-Pose on ALL frames (~5 fps, 3000 frames for 10min video)
+  - Object detection: Rider, bike, air time, lean angle, speed
+  - GPU acceleration (NVIDIA L4 on Cloud Run)
+- [ ] **Intelligent Frame Selection**
+  - Track 1: YOLO pre-filter for action detection
+  - Track 2: GPT-4o-mini on top action frames (~50 frames)
+  - Track 3: GPT-4o-mini on scenery samples (~30 frames)
+- [ ] **Quality Improvements**
+  - Better jump/trick detection (YOLO pose estimation)
+  - Crash detection (abnormal poses)
+  - Beautiful scenery clips for transitions
+  - Speed estimation from frame deltas
+- [ ] **Cost Optimization**
+  - $0.27/video (vs. $0.36 in v0.5)
+  - 3000 YOLO frames + 80 GPT frames
+  - GPU cost: $0.05/video (NVIDIA L4)
 - [ ] Beat-Synchronisierung mit custom Musik
 - [ ] Automatisches Color-Grading
 - [ ] Slow-Motion für Top-Highlights
-- [ ] Object Tracking (Rider Detection)
 
 ### Version 2.5 (Self-Hosted - VServer) 🖥️
 - [ ] **Dedicated Server Deployment** (Alternative to GCP)

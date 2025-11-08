@@ -318,13 +318,22 @@ No breaking changes. New MCP tools added, existing tools unchanged.
 - [ ] Export presets (YouTube, Instagram, TikTok)
 - [ ] **Best for:** Startup SaaS, bursty workloads, global users
 
-### Version 2.0 (Advanced CV - Option B)
-- [ ] Motion detection via Optical Flow
-- [ ] Pose detection for trick recognition (MediaPipe/YOLO)
+### Version 2.0 (Advanced CV - YOLO Hybrid) 🤖
+- [ ] **YOLO Integration** - Hybrid 3-Track Processing
+  - YOLOv8-Pose on ALL frames (~5 fps, 3000 frames for 10min video)
+  - GPU acceleration (NVIDIA L4 on Cloud Run)
+  - Object detection: Rider, bike, air time, lean angle, speed
+- [ ] **Intelligent Frame Selection**
+  - Track 1: YOLO pre-filter for action detection
+  - Track 2: GPT-4o-mini on top action frames (~50 frames)
+  - Track 3: GPT-4o-mini on scenery samples (~30 frames)
+- [ ] **Quality + Cost Optimization**
+  - Better jump/trick/crash detection via pose estimation
+  - Beautiful scenery clips for transitions
+  - Cost: $0.27/video (25% cheaper than v0.5)
 - [ ] Beat synchronization with custom music
 - [ ] Automatic color grading
 - [ ] Slow-motion for highlights
-- [ ] Object tracking (rider detection)
 
 ### Version 2.5 (Self-Hosted - VServer) 🖥️
 - [ ] **Dedicated Server Deployment** (Alternative to GCP)
