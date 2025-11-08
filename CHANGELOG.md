@@ -208,7 +208,7 @@ MVP (Version 0.5) is complete and ready for testing. All core features for autom
   - `kubrick-api`: FastAPI backend (Port 8080)
   - `kubrick-ui`: React frontend (Port 3000)
 - Video upload and processing pipeline
-  - Frame extraction (45 frames per video)
+  - Frame extraction (180 frames per video for better action detection)
   - Caption generation (GPT-4o-mini)
   - Audio transcription (Whisper)
   - Embeddings (CLIP, text-embedding-3-small)
@@ -229,22 +229,22 @@ MVP (Version 0.5) is complete and ready for testing. All core features for autom
 
 ### Processing Time (per minute of video)
 - Frame extraction: 2-5s
-- Caption generation (45 frames): 15-30s
+- Caption generation (180 frames): 60-120s
 - Audio transcription: 10-20s
 - Audio intensity analysis: 5-10s
 - Action score calculation: 1-2s
 - Video assembly: 10-20s
-- **Total: ~45-90s per minute of video**
+- **Total: ~90-180s per minute of video**
 
 ### API Costs (OpenAI, as of 2025)
-- GPT-4o-mini (45 captions): ~$0.002/min
+- GPT-4o-mini (180 captions): ~$0.008/min
 - Whisper (transcription): ~$0.006/min
 - text-embedding-3-small: ~$0.001/min
-- **Total: ~$0.009 per minute of video** (less than 1 cent per minute)
+- **Total: ~$0.036 per minute of video** (~3.6 cents per minute)
 
 ### Example: 10-minute video
-- Processing time: 7-15 minutes
-- API cost: ~$0.09 (9 cents)
+- Processing time: 10-20 minutes
+- API cost: ~$0.36 (36 cents - primarily GPT-4o-mini vision for 180 frames)
 
 ---
 

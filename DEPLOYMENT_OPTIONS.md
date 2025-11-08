@@ -11,9 +11,9 @@ Complete guide for deploying the MTB Video Editor across different infrastructur
 
 | Deployment | Setup | Cost/Month | Cost/Video | Performance | Scaling | Best For |
 |------------|-------|------------|------------|-------------|---------|----------|
-| **Local (Current)** | ✅ Simple | $0 | $0.09 | 1 video at a time | ❌ None | MVP testing, < 10 videos/month |
-| **VServer + Celery** | ⚠️ Medium | $80-160 | $0.12 | 4 parallel, 16-24/hour | ⚠️ Manual | 100-1000 videos/month, predictable load |
-| **GCP Cloud Run** | ⚠️⚠️ Complex | $16-23 | $0.19 | Unlimited, 1000+/hour | ✅ Automatic | > 1000 videos/month, bursty loads |
+| **Local (Current)** | ✅ Simple | $0 | $0.36 | 1 video at a time | ❌ None | MVP testing, < 10 videos/month |
+| **VServer + Celery** | ⚠️ Medium | $80-160 | $0.48 | 4 parallel, 16-24/hour | ⚠️ Manual | 100-1000 videos/month, predictable load |
+| **GCP Cloud Run** | ⚠️⚠️ Complex | $16-23 | $0.46 | Unlimited, 1000+/hour | ✅ Automatic | > 1000 videos/month, bursty loads |
 
 ---
 
@@ -57,14 +57,14 @@ Total Base Cost:                   ~$13-23/month
 
 Per Video Variable Cost:
 - Cloud Run Job compute (4 vCPU, 10 min):  $0.10
-- OpenAI APIs (GPT-4o-mini + Whisper):     $0.09
+- OpenAI APIs (180 frames + Whisper):      $0.36
                                           ------
-Total per video:                           $0.19
+Total per video:                           $0.46
 
 Profit Margin Examples:
-- Charging $1/video:  $0.81 profit (427% margin) ✅
-- Charging $2/video:  $1.81 profit (952% margin) ✅
-- Charging $3/video:  $2.81 profit (1479% margin) ✅
+- Charging $1/video:  $0.54 profit (117% margin) ✅
+- Charging $2/video:  $1.54 profit (335% margin) ✅
+- Charging $3/video:  $2.54 profit (552% margin) ✅
 ```
 
 **Monthly Examples:**
@@ -72,10 +72,10 @@ Profit Margin Examples:
 | Videos/Month | GCP Cost | Revenue ($2/video) | Profit | Margin |
 |--------------|----------|-------------------|--------|--------|
 | 0 | $13 | $0 | -$13 | - |
-| 50 | $22.50 | $100 | $77.50 | 344% |
-| 100 | $32 | $200 | $168 | 525% |
-| 500 | $108 | $1,000 | $892 | 826% |
-| 1,000 | $203 | $2,000 | $1,797 | 886% |
+| 50 | $36 | $100 | $64 | 178% |
+| 100 | $59 | $200 | $141 | 239% |
+| 500 | $243 | $1,000 | $757 | 312% |
+| 1,000 | $473 | $2,000 | $1,527 | 323% |
 
 **Recommendation:** GCP provides excellent profit margins while eliminating infrastructure management and enabling unlimited growth.
 
@@ -108,9 +108,9 @@ Profit Margin Examples:
 | **Max Video Length** | Limited by patience (~30 min) |
 
 **Example: 10-minute video**
-- Processing time: ~15 minutes
-- OpenAI API cost: $0.09
-- Total cost: **$0.09/video**
+- Processing time: ~15-20 minutes
+- OpenAI API cost: $0.36 (180 frames × GPT-4o-mini vision)
+- Total cost: **$0.36/video**
 
 ### Pros
 - ✅ Zero infrastructure cost

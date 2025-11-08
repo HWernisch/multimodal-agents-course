@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     IMAGE_CAPTION_MODEL: str = "gpt-4o-mini"
 
     # --- Video Ingestion Configuration ---
-    SPLIT_FRAMES_COUNT: int = 45
+    SPLIT_FRAMES_COUNT: int = 180  # Extract 180 frames (~3-4s intervals for 10min video) for better MTB action detection
     AUDIO_CHUNK_LENGTH: int = 10
     AUDIO_OVERLAP_SECONDS: int = 1
     AUDIO_MIN_CHUNK_DURATION_SECONDS: int = 1
