@@ -441,96 +441,206 @@ docker-compose up
 
 ---
 
-## 🔮 Roadmap
+## 🔮 Quality-First Roadmap
 
-### Version 0.5 (MVP) - ✅ COMPLETED
-- [x] Technischer Plan
-- [x] Caption-basierte Action-Erkennung
-- [x] Audio-Intensitäts-Analyse
-- [x] Action-Scoring-System mit intelligenter Clip-Dauer
-- [x] Video-Assembly-Engine (FFmpeg + MoviePy)
-- [x] Mobile-First UI für Highlight-Generierung
-- [x] Highlight Library & Video Management
-- [x] MCP Tools Integration
+**Mission:** Build the world's best MTB action detection - no existing software reliably finds the best moments.
 
-**Status:** Bereit für lokales Testing mit echten MTB-Videos!
+**Core Metrics:**
+- 🎯 **Recall 95%+**: Never miss a great jump, trick, or crash
+- 🎯 **Precision 90%+**: Only show real action, eliminate boring sections
+- 🎯 **Ranking**: Best moments ranked perfectly
 
-### Version 1.0 (Stable Release) - 🚧 Next
-- [ ] Umfassendes Testing mit realen MTB-Videos
-- [ ] Performance-Optimierung (Parallelisierung)
-- [ ] Bessere Error Messages & User Feedback
-- [ ] Preset-Profile ("Extreme Action", "Balanced", "Cinematic")
-- [ ] Clip-Preview vor finalem Export
-- [ ] Anpassbare Clip-Grenzen in UI
-- [ ] Dokumentation für Contributors
+---
 
-### Version 1.5 (SaaS Launch - GCP) ☁️
-- [ ] **Google Cloud Platform Deployment** - Serverless Production
-  - Cloud Run (always-on API, ~$10/month)
-  - Cloud Run Jobs (on-demand workers, $0 idle, no timeout limits)
-  - Firebase Hosting (frontend)
-  - Cloud Storage (videos/highlights)
-  - Firestore (task state, user data)
-  - Cloud Tasks (job queue)
-- [ ] **Infinite Auto-Scaling**
-  - 0 → 1000+ concurrent jobs
-  - Pay-per-use: ~$0.19/video ($0.10 compute + $0.09 APIs)
-  - Per-job cost tracking & analytics
-- [ ] **Push Notifications**
-  - Browser push (PWA)
-  - Mobile app notifications (Firebase Cloud Messaging)
-  - Email alerts
-- [ ] **Multi-Tenant Architecture**
-  - Firebase Authentication
-  - User isolation & rate limiting
-  - Storage quotas
-- [ ] **Performance Monitoring Dashboard**
-- [ ] **Export Presets** (YouTube, Instagram, TikTok)
-- [ ] **Best for:** Startup SaaS, bursty workloads, global users, unlimited growth
+### Version 0.6 (Current) - Baseline Established ✅
+- [x] 180 frames per video (~3-4s intervals)
+- [x] GPT-4o-mini captions with custom MTB prompts
+- [x] Audio intensity analysis (Librosa)
+- [x] Dynamic clip duration (action-type + score based)
+- [x] ActionScore system (6 factors, 0-100 scoring)
+- [x] Video assembly with FFmpeg + MoviePy
+- [x] Mobile-first UI + Highlight Library
 
-### Version 2.0 (Advanced CV - Hybrid AI) 🤖
-- [ ] **Triple-Hybrid Processing** - MediaPipe + Florence-2 + GPT-4o-mini
-  - MediaPipe Pose (CPU/GPU, 180 frames): Air time, lean angle, trick detection
-  - Florence-2 (GPU, 180 frames): Generic captions for pre-filtering
-  - GPT-4o-mini (API, ~80 top frames): Custom MTB prompts for detail analysis
-- [ ] **Intelligent Frame Selection**
-  - Track 1: MediaPipe for objective physics metrics (free!)
-  - Track 2: Florence-2 pre-filter to reduce GPT calls by 55%
-  - Track 3: GPT-4o-mini on top action/scenery candidates only
-- [ ] **Quality Improvements**
-  - Precise jump/trick detection (MediaPipe 33 keypoints)
-  - Crash detection via abnormal pose patterns
-  - Scenery clips for beautiful transitions (Florence-2)
-  - Physics-based scoring (air time, rotation, lean angle)
-- [ ] **Cost Optimization**
-  - $0.24/video (33% cheaper than v0.5's $0.36)
-  - MediaPipe: $0.00 (runs on CPU)
-  - Florence-2: $0.02 (small GPU footprint)
-  - GPT-4o-mini: $0.16 (only 80 frames vs 180)
-  - Better quality + lower cost!
-- [ ] Beat-Synchronisierung mit custom Musik
-- [ ] Automatisches Color-Grading
-- [ ] Slow-Motion für Top-Highlights
+**Status:** Ready for real-world testing with MTB videos
 
-### Version 2.5 (Self-Hosted - VServer) 🖥️
-- [ ] **Dedicated Server Deployment** (Alternative to GCP)
-  - Celery + Redis Task Queue
-  - 4 parallel workers on 8 vCPU, 16GB RAM server
-  - Performance: 16-24 videos/hour (10 min videos each)
-  - Cost: $80-160/month base + $0.12/video at scale (667+ videos/month)
-- [ ] **Horizontal Scaling**
-  - Manual server upgrades
-  - Task retry & prioritization
-  - Worker monitoring dashboard
-- [ ] **Best for:** Self-hosted deployments, data sovereignty, predictable costs at scale
+**Next Step:** Test with 10-20 real MTB videos, measure recall/precision
 
-### Version 3.0 (Multi-Video & Professional)
-- [ ] Multi-Camera-Support mit Auto-Angle-Selection
-- [ ] 360° Video Support
-- [ ] GPS Data Overlay (Speed, Elevation, Map)
-- [ ] Strava/Komoot Integration
-- [ ] Team/Organization Accounts
-- [ ] White-Label Solution
+---
+
+### Version 1.0 (Validation & Learning) - 🚧 CRITICAL PHASE
+
+**Goal:** Learn what the system misses and why
+
+- [ ] **Testing Protocol**
+  - Manually annotate 10-20 MTB videos (mark all jumps/tricks/crashes)
+  - Compare AI detection vs. manual annotations
+  - Measure: Recall (% of action found), Precision (% correct), False negatives
+- [ ] **Analysis Dashboard**
+  - Visualize which frames got high scores
+  - Show missed action moments (false negatives)
+  - Identify false positives (boring frames scored high)
+- [ ] **Iterative Prompt Tuning**
+  - Refine CAPTION_MODEL_PROMPT based on failures
+  - Test different excitement level descriptions
+  - Optimize action type keywords
+- [ ] **Audio-Visual Correlation**
+  - Analyze correlation between audio peaks and visual action
+  - Identify when audio alone catches action (visual misses)
+- [ ] **Score Threshold Optimization**
+  - Find optimal min_action_score (currently 60)
+  - Balance recall vs. precision
+
+**Success Criteria:**
+- Recall ≥ 85% (find 85%+ of manually annotated action)
+- Precision ≥ 80% (80%+ of selected clips are real action)
+- Understand failure modes
+
+**Cost:** Not a concern - use GPT-4 if better than GPT-4o-mini
+
+---
+
+### Version 1.5 (Multi-Signal Fusion) - Maximum Signal Coverage
+
+**Goal:** Capture action from ALL possible signals, don't miss anything
+
+- [ ] **Dense Temporal Sampling**
+  - Increase to 300-500 frames (every 1-2s) for critical testing
+  - Or: Adaptive sampling (more frames during audio peaks)
+- [ ] **Physics-Based Detection (MediaPipe Pose)**
+  - Air time detection (rider off ground)
+  - Lean angle measurement (>45° = trick territory)
+  - Rotation detection (spins, whips)
+  - Speed proxy (keypoint movement between frames)
+  - Runs in parallel with caption generation
+- [ ] **Motion Analysis (Optical Flow)**
+  - Detect fast camera motion (often = speed/action)
+  - Blur detection (very fast motion)
+  - Scene change detection (cut to different angle)
+- [ ] **Multi-Frame Context (Video Understanding)**
+  - SlowFast Networks: Understand action over 0.5-1s clips
+  - Temporal Action Detection: "This is a jump sequence, not single jump"
+- [ ] **Improved Audio Analysis**
+  - Impact sound detection (crashes, landings)
+  - Whoosh sounds (fast air movement)
+  - Crowd cheering (if present)
+  - Wind noise (speed indicator)
+- [ ] **Score Fusion Algorithm**
+  - Weighted combination of all signals
+  - Machine learning model to optimize weights
+  - Ensemble approach: If ANY signal fires strong, investigate
+
+**Success Criteria:**
+- Recall ≥ 93% (catch almost everything)
+- Precision ≥ 85%
+- No great moments missed
+
+---
+
+### Version 2.0 (Advanced AI - Maximum Quality) 🏆
+
+**Goal:** Use the absolute best AI models, cost doesn't matter
+
+- [ ] **Best-in-Class Caption Model**
+  - Test: GPT-4o vs. GPT-4 vs. Claude 3.5 Sonnet
+  - Use whichever gives best MTB action understanding
+  - Consider ensemble: Multiple models vote on score
+- [ ] **Scene Understanding (Florence-2 + YOLO)**
+  - Florence-2: Scene context, landscape quality
+  - YOLOv8-Pose: Precise rider pose (combine with MediaPipe)
+  - Both models together: More signals = better detection
+- [ ] **Temporal Models (Video-specific AI)**
+  - SlowFast R50: Action recognition over time
+  - VideoMAE: Understand 16-frame sequences
+  - X3D: Efficient 3D CNN for video understanding
+- [ ] **Trick Classification**
+  - Train custom model on MTB tricks
+  - Classes: Whip, 360, Backflip, Drop, Gap Jump, Manual, etc.
+  - Use for better clip duration (backflip needs more time than simple jump)
+- [ ] **Scenery Scoring**
+  - Separate AI for landscape beauty
+  - Golden hour detection
+  - Vista/mountain backdrop scoring
+  - Strategic placement for transitions
+- [ ] **Multi-Model Ensemble**
+  - 5-10 different AI models analyze each frame
+  - Voting system: Consensus = high confidence
+  - Disagreement = interesting edge case (review manually)
+
+**Success Criteria:**
+- Recall ≥ 97% (industry-leading)
+- Precision ≥ 92%
+- Better than any human editor
+
+---
+
+### Version 2.5 (Temporal Intelligence) - Video Understanding
+
+**Goal:** Understand videos as sequences, not isolated frames
+
+- [ ] **Story Arc Detection**
+  - Build-up → Action → Landing/Crash sequence
+  - Include context before/after main action
+  - Show "the run" not just "the jump"
+- [ ] **Progression Tracking**
+  - Detect multiple attempts at same feature
+  - Show best attempt or progression sequence
+- [ ] **Pacing Algorithm**
+  - Vary clip intensity (don't exhaust viewer)
+  - Place scenery strategically between action peaks
+  - Build to climax (biggest action at end)
+- [ ] **Beat Synchronization**
+  - Align action peaks with music beats
+  - Cut on beat for rhythm
+  - Slow-motion on peak moments
+- [ ] **Adaptive Clip Duration**
+  - Short clips for rapid-fire action montage
+  - Longer clips for technical sections (show the line)
+  - Flow state: Let good riding breathe
+
+---
+
+### Version 3.0 (Professional Grade) - Industry Standard
+
+**Goal:** Match or exceed professional video editors
+
+- [ ] **Multi-Camera Support**
+  - Sync multiple angles of same action
+  - Auto-select best angle
+  - Cut between angles mid-sequence
+- [ ] **360° Video Support**
+  - Reframe 360 footage to follow action
+  - Stabilization for 360 content
+- [ ] **GPS + Sensor Data**
+  - Overlay speed, elevation, heart rate
+  - Jump height calculation from GPS
+  - G-force visualization
+  - Strava/Komoot integration
+- [ ] **Professional Color Grading**
+  - Auto-grade for consistency
+  - Preset LUTs (film look, high contrast, etc.)
+  - Match color across different cameras
+- [ ] **Human-in-the-Loop**
+  - AI suggests clips with confidence scores
+  - Editor approves/rejects
+  - System learns from editor choices
+  - Active learning: Focus on uncertain cases
+
+**Success Criteria:**
+- Indistinguishable from professional human edit
+- Used by professional MTB videographers
+- Industry recognition
+
+---
+
+### SaaS Deployment (Parallel Track) ☁️
+
+**Note:** SaaS infrastructure developed in parallel to quality improvements
+
+- **v1.5**: GCP Cloud Run deployment (serverless, auto-scaling)
+- **v2.0**: Multi-tenant architecture, Firebase Auth, push notifications
+- **v3.0**: Enterprise features, team accounts, white-label
+
+See [DEPLOYMENT_OPTIONS.md](DEPLOYMENT_OPTIONS.md) for details.
 
 ---
 

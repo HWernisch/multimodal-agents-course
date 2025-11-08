@@ -295,66 +295,66 @@ No breaking changes. New MCP tools added, existing tools unchanged.
 
 ---
 
-## Roadmap
+## Quality-First Roadmap
 
-### Version 1.0 (Stable Release)
-- [ ] Comprehensive testing with real MTB videos
-- [ ] Performance optimizations (parallel frame processing)
-- [ ] Better error messages and user feedback
-- [ ] Preset profiles ("Extreme Action", "Balanced", "Cinematic")
+**Mission:** Build the world's best MTB action detection
 
-### Version 1.5 (SaaS Launch - GCP) ☁️
-- [ ] **Google Cloud Platform Deployment** (Serverless Production)
-  - Cloud Run (always-on API, ~$10/month)
-  - Cloud Run Jobs (on-demand workers, $0 idle, no timeout limits)
-  - Firebase Hosting (frontend)
-  - Cloud Storage, Firestore, Cloud Tasks
-- [ ] **Infinite Auto-Scaling** (0 → 1000+ concurrent jobs)
-- [ ] **Pay-per-use:** ~$0.19/video ($0.10 compute + $0.09 APIs)
-- [ ] **Push Notifications** (Browser PWA, Mobile, Email)
-- [ ] **Multi-Tenant Architecture** (Firebase Auth, user isolation)
-- [ ] Performance monitoring dashboard
-- [ ] Per-job cost tracking & analytics
-- [ ] Export presets (YouTube, Instagram, TikTok)
-- [ ] **Best for:** Startup SaaS, bursty workloads, global users
+**Core Metrics:** Recall 95%+, Precision 90%+, Perfect Ranking
 
-### Version 2.0 (Advanced CV - Hybrid AI) 🤖
-- [ ] **Triple-Hybrid Processing** - MediaPipe + Florence-2 + GPT-4o-mini
-  - MediaPipe Pose (CPU/GPU): Physics metrics (air time, lean, rotation)
-  - Florence-2 (GPU): Generic captions + pre-filtering
-  - GPT-4o-mini (API): Custom MTB prompts on top candidates only
-- [ ] **Intelligent Frame Selection**
-  - MediaPipe: Objective physics on all 180 frames (free!)
-  - Florence-2: Pre-filter reduces GPT calls by 55%
-  - GPT-4o-mini: Detail analysis on ~80 top frames only
-- [ ] **Quality + Cost Optimization**
-  - Better jump/trick/crash detection (MediaPipe 33 keypoints)
-  - Scenery detection for transitions (Florence-2)
-  - Cost: $0.24/video (33% cheaper than v0.5)
-  - MediaPipe $0 + Florence-2 $0.02 + GPT $0.16 + Whisper $0.06
-- [ ] Beat synchronization with custom music
-- [ ] Automatic color grading
-- [ ] Slow-motion for highlights
+### Version 1.0 (Validation & Learning) - 🚧 CRITICAL
+**Goal:** Test with real videos, measure what we miss
 
-### Version 2.5 (Self-Hosted - VServer) 🖥️
-- [ ] **Dedicated Server Deployment** (Alternative to GCP)
-  - Celery + Redis Task Queue
-  - 4 parallel workers on 8 vCPU, 16GB RAM server
-  - Performance: 16-24 videos/hour (10 min videos each)
-  - Cost: $80-160/month base + $0.12/video at scale (667+ videos/month)
-- [ ] Horizontal scaling capability
-- [ ] Worker monitoring dashboard
-- [ ] Task retry & prioritization
-- [ ] **Best for:** Self-hosted deployments, data sovereignty, predictable costs at scale
+- [ ] Manual annotation of 10-20 MTB videos (ground truth)
+- [ ] Measure recall/precision vs. annotations
+- [ ] Analysis dashboard (visualize scores, missed moments)
+- [ ] Iterative prompt tuning based on failures
+- [ ] Audio-visual correlation analysis
+- [ ] Score threshold optimization
+- **Success:** Recall ≥85%, Precision ≥80%, understand failures
 
-### Version 3.0 (Multi-Video & Professional)
-- [ ] Multi-camera support with auto-angle selection
-- [ ] 360° video support
-- [ ] GPS data overlay (speed, elevation, map)
-- [ ] Strava/Komoot integration
-- [ ] Team/Organization accounts
-- [ ] Social media export formats (Instagram, TikTok, YouTube Shorts)
-- [ ] White-label solution
+### Version 1.5 (Multi-Signal Fusion) - Maximum Coverage
+**Goal:** Capture action from ALL signals, miss nothing
+
+- [ ] Dense temporal sampling (300-500 frames or adaptive)
+- [ ] MediaPipe Pose: Air time, lean angle, rotation, speed
+- [ ] Optical Flow: Camera motion, blur, scene changes
+- [ ] SlowFast Networks: Temporal action understanding
+- [ ] Enhanced audio: Impact sounds, whoosh, crowd, wind
+- [ ] Score fusion with ML-optimized weights
+- **Success:** Recall ≥93%, Precision ≥85%
+
+### Version 2.0 (Advanced AI) - Maximum Quality 🏆
+**Goal:** Best AI models regardless of cost
+
+- [ ] Test GPT-4o vs GPT-4 vs Claude 3.5 Sonnet (use best)
+- [ ] Multi-model ensemble (5-10 models vote)
+- [ ] Florence-2 + YOLO: Scene understanding + precise pose
+- [ ] SlowFast/VideoMAE/X3D: Temporal video understanding
+- [ ] Custom trick classifier (Whip, 360, Backflip, etc.)
+- [ ] Dedicated scenery AI (golden hour, vista scoring)
+- **Success:** Recall ≥97%, Precision ≥92%, beat human editors
+
+### Version 2.5 (Temporal Intelligence) - Video Understanding
+**Goal:** Understand sequences, not isolated frames
+
+- [ ] Story arc detection (build-up → action → landing)
+- [ ] Progression tracking (multiple attempts, show best)
+- [ ] Pacing algorithm (vary intensity, strategic scenery)
+- [ ] Beat synchronization (align action with music)
+- [ ] Adaptive clip duration (context-aware timing)
+
+### Version 3.0 (Professional Grade) - Industry Standard
+**Goal:** Match professional editors
+
+- [ ] Multi-camera support (sync angles, auto-select best)
+- [ ] 360° video with intelligent reframing
+- [ ] GPS + sensors (speed, elevation, heart rate, G-force)
+- [ ] Professional color grading (LUTs, consistency)
+- [ ] Human-in-the-loop (AI suggests, editor approves, system learns)
+- **Success:** Indistinguishable from pro edit, industry adoption
+
+### SaaS Deployment (Parallel Track)
+Developed alongside quality improvements - see [DEPLOYMENT_OPTIONS.md](DEPLOYMENT_OPTIONS.md)
 
 ---
 
