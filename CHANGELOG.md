@@ -318,19 +318,20 @@ No breaking changes. New MCP tools added, existing tools unchanged.
 - [ ] Export presets (YouTube, Instagram, TikTok)
 - [ ] **Best for:** Startup SaaS, bursty workloads, global users
 
-### Version 2.0 (Advanced CV - YOLO Hybrid) 🤖
-- [ ] **YOLO Integration** - Hybrid 3-Track Processing
-  - YOLOv8-Pose on ALL frames (~5 fps, 3000 frames for 10min video)
-  - GPU acceleration (NVIDIA L4 on Cloud Run)
-  - Object detection: Rider, bike, air time, lean angle, speed
+### Version 2.0 (Advanced CV - Hybrid AI) 🤖
+- [ ] **Triple-Hybrid Processing** - MediaPipe + Florence-2 + GPT-4o-mini
+  - MediaPipe Pose (CPU/GPU): Physics metrics (air time, lean, rotation)
+  - Florence-2 (GPU): Generic captions + pre-filtering
+  - GPT-4o-mini (API): Custom MTB prompts on top candidates only
 - [ ] **Intelligent Frame Selection**
-  - Track 1: YOLO pre-filter for action detection
-  - Track 2: GPT-4o-mini on top action frames (~50 frames)
-  - Track 3: GPT-4o-mini on scenery samples (~30 frames)
+  - MediaPipe: Objective physics on all 180 frames (free!)
+  - Florence-2: Pre-filter reduces GPT calls by 55%
+  - GPT-4o-mini: Detail analysis on ~80 top frames only
 - [ ] **Quality + Cost Optimization**
-  - Better jump/trick/crash detection via pose estimation
-  - Beautiful scenery clips for transitions
-  - Cost: $0.27/video (25% cheaper than v0.5)
+  - Better jump/trick/crash detection (MediaPipe 33 keypoints)
+  - Scenery detection for transitions (Florence-2)
+  - Cost: $0.24/video (33% cheaper than v0.5)
+  - MediaPipe $0 + Florence-2 $0.02 + GPT $0.16 + Whisper $0.06
 - [ ] Beat synchronization with custom music
 - [ ] Automatic color grading
 - [ ] Slow-motion for highlights

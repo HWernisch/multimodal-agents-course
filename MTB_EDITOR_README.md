@@ -488,24 +488,26 @@ docker-compose up
 - [ ] **Export Presets** (YouTube, Instagram, TikTok)
 - [ ] **Best for:** Startup SaaS, bursty workloads, global users, unlimited growth
 
-### Version 2.0 (Advanced CV - YOLO Hybrid) 🤖
-- [ ] **YOLO Integration** - Hybrid 3-Track Processing
-  - YOLOv8-Pose on ALL frames (~5 fps, 3000 frames for 10min video)
-  - Object detection: Rider, bike, air time, lean angle, speed
-  - GPU acceleration (NVIDIA L4 on Cloud Run)
+### Version 2.0 (Advanced CV - Hybrid AI) 🤖
+- [ ] **Triple-Hybrid Processing** - MediaPipe + Florence-2 + GPT-4o-mini
+  - MediaPipe Pose (CPU/GPU, 180 frames): Air time, lean angle, trick detection
+  - Florence-2 (GPU, 180 frames): Generic captions for pre-filtering
+  - GPT-4o-mini (API, ~80 top frames): Custom MTB prompts for detail analysis
 - [ ] **Intelligent Frame Selection**
-  - Track 1: YOLO pre-filter for action detection
-  - Track 2: GPT-4o-mini on top action frames (~50 frames)
-  - Track 3: GPT-4o-mini on scenery samples (~30 frames)
+  - Track 1: MediaPipe for objective physics metrics (free!)
+  - Track 2: Florence-2 pre-filter to reduce GPT calls by 55%
+  - Track 3: GPT-4o-mini on top action/scenery candidates only
 - [ ] **Quality Improvements**
-  - Better jump/trick detection (YOLO pose estimation)
-  - Crash detection (abnormal poses)
-  - Beautiful scenery clips for transitions
-  - Speed estimation from frame deltas
+  - Precise jump/trick detection (MediaPipe 33 keypoints)
+  - Crash detection via abnormal pose patterns
+  - Scenery clips for beautiful transitions (Florence-2)
+  - Physics-based scoring (air time, rotation, lean angle)
 - [ ] **Cost Optimization**
-  - $0.27/video (vs. $0.36 in v0.5)
-  - 3000 YOLO frames + 80 GPT frames
-  - GPU cost: $0.05/video (NVIDIA L4)
+  - $0.24/video (33% cheaper than v0.5's $0.36)
+  - MediaPipe: $0.00 (runs on CPU)
+  - Florence-2: $0.02 (small GPU footprint)
+  - GPT-4o-mini: $0.16 (only 80 frames vs 180)
+  - Better quality + lower cost!
 - [ ] Beat-Synchronisierung mit custom Musik
 - [ ] Automatisches Color-Grading
 - [ ] Slow-Motion für Top-Highlights

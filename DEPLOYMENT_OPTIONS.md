@@ -669,36 +669,37 @@ def route_task(video_path, queue_depth):
 
 ---
 
-## Future: Version 2.0 - YOLO Hybrid Architecture (GCP + GPU)
+## Future: Version 2.0 - Triple-Hybrid AI Architecture (GCP + GPU)
 
 ### Overview
 
-Version 2.0 introduces **YOLO-based pre-filtering** to improve quality while reducing costs:
+Version 2.0 introduces **MediaPipe + Florence-2 pre-filtering** to improve quality while reducing costs:
 
 ```
 ┌──────────────────────────────────────────────────┐
-│  3-Track Processing Pipeline                     │
+│  Triple-Hybrid Processing Pipeline               │
 │                                                   │
-│  Track 1: YOLO (GPU)                             │
-│  ├─ All frames (~3000 for 10min @ 5fps)         │
-│  ├─ Object detection: rider, bike, pose         │
-│  ├─ Metrics: air time, lean angle, speed        │
-│  └─ Cost: $0.05 (NVIDIA L4 GPU, 3-5 min)        │
+│  Track 1: MediaPipe Pose (CPU/GPU)               │
+│  ├─ 180 frames (same as v0.5)                   │
+│  ├─ Physics: air time, lean angle, rotation     │
+│  ├─ 33 keypoints for precise trick detection    │
+│  └─ Cost: $0.00 (runs on CPU!)                  │
 │                                                   │
-│  Track 2: GPT-4o-mini (Action)                   │
-│  ├─ Top 50 YOLO action frames                   │
-│  ├─ Semantic analysis: trick type, excitement   │
-│  └─ Cost: $0.10                                  │
+│  Track 2: Florence-2 (GPU)                       │
+│  ├─ 180 frames (generic captions)               │
+│  ├─ Pre-filter for action/scenery candidates    │
+│  ├─ Reduces GPT calls from 180 → 80             │
+│  └─ Cost: $0.02 (small GPU footprint)           │
 │                                                   │
-│  Track 3: GPT-4o-mini (Scenery)                  │
-│  ├─ 30 sampled low-action frames                │
-│  ├─ Detect beautiful landscapes for transitions │
-│  └─ Cost: $0.06                                  │
+│  Track 3: GPT-4o-mini (Detail)                   │
+│  ├─ Top 80 candidates (50 action + 30 scenery)  │
+│  ├─ Custom MTB prompts for detailed analysis    │
+│  └─ Cost: $0.16 (55% fewer calls!)              │
 │                                                   │
 │  Audio: Whisper transcription                    │
 │  └─ Cost: $0.06                                  │
 │                                                   │
-│  Total: $0.27/video (25% cheaper than v0.5!)    │
+│  Total: $0.24/video (33% cheaper than v0.5!)    │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -707,14 +708,26 @@ Version 2.0 introduces **YOLO-based pre-filtering** to improve quality while red
 | Version | Frames Analyzed | AI Cost | Quality | Processing Time |
 |---------|----------------|---------|---------|-----------------|
 | **v0.5 (Current)** | 180 GPT-4o-mini | $0.36 | ⭐⭐⭐⭐ | 10-20 min |
-| **v2.0 (YOLO Hybrid)** | 3000 YOLO + 80 GPT | $0.27 | ⭐⭐⭐⭐⭐ | 5-10 min |
+| **v2.0 (Triple-Hybrid)** | 180 MediaPipe + 180 Florence-2 + 80 GPT | $0.24 | ⭐⭐⭐⭐⭐ | 6-10 min |
+
+**Why MediaPipe > YOLO:**
+- ✅ More keypoints (33 vs 17) for better trick detection
+- ✅ Runs on CPU (no GPU cost!)
+- ✅ Free and open-source
+- ✅ Better for physics metrics (air time, lean angle, rotation)
+
+**Why Florence-2 as Pre-Filter:**
+- ✅ Generates captions + bounding boxes (YOLO can't caption!)
+- ✅ Reduces GPT calls by 55% (180 → 80 frames)
+- ✅ Detects scenery (YOLO can't distinguish "beautiful vista" from "riding")
+- ✅ Small GPU footprint ($0.02 vs YOLO's $0.05)
 
 ### GCP Deployment with GPU
 
 **Cloud Run Job Configuration:**
 ```bash
-gcloud run jobs create mtb-worker-yolo \
-  --image gcr.io/action-cut/yolo-worker \
+gcloud run jobs create mtb-worker-hybrid \
+  --image gcr.io/action-cut/hybrid-worker \
   --region us-central1 \
   --gpu 1 \
   --gpu-type nvidia-l4 \
@@ -732,33 +745,45 @@ NVIDIA L4 GPU: $0.70/hour
 ─────────────────────────
 Total: $0.80/hour
 
-Processing 10-min video: ~4 minutes
-GPU cost per video: $0.80 × (4/60) = $0.053 ≈ $0.05
+Processing 10-min video: ~2 minutes (MediaPipe CPU + Florence-2 GPU)
+GPU cost per video: $0.80 × (2/60) = $0.027 ≈ $0.02
+
+Note: MediaPipe runs on CPU in parallel, no GPU needed!
+Florence-2 is much smaller than YOLO (0.77B vs 43M params)
 ```
 
 ### Updated SaaS Profit Margins (v2.0)
 
-| Videos/Month | Total Cost | Revenue ($2/video) | Profit | Margin |
-|--------------|------------|-------------------|--------|--------|
+**Cost per video:** $0.24 (MediaPipe $0 + Florence-2 $0.02 + GPT $0.16 + Whisper $0.06)
+
+| Videos/Month | GCP Cost | Revenue ($2/video) | Profit | Margin |
+|--------------|----------|-------------------|--------|--------|
 | 0 | $13 (base) | $0 | -$13 | - |
-| 50 | $26.50 | $100 | $73.50 | 277% |
-| 100 | $40 | $200 | $160 | 400% |
-| 500 | $148 | $1,000 | $852 | 576% |
-| 1,000 | $283 | $2,000 | $1,717 | 607% |
+| 50 | $25 | $100 | $75 | 300% |
+| 100 | $37 | $200 | $163 | 441% |
+| 500 | $133 | $1,000 | $867 | 651% |
+| 1,000 | $253 | $2,000 | $1,747 | 691% |
+
+**Comparison with v0.5:**
+- v0.5: $0.46/video total ($0.36 AI + $0.10 GCP compute) → $1.54 profit at $2/video
+- v2.0: $0.37/video total ($0.24 AI + $0.13 GCP compute) → $1.63 profit at $2/video
+- **Extra profit: $0.09/video** (441% margin vs 335%)
 
 ### Benefits
 
-- ✅ **Better Quality:** YOLO detects jumps/tricks/crashes that GPT-4o-mini might miss
-- ✅ **Lower Cost:** 25% cheaper ($0.27 vs. $0.36/video)
-- ✅ **Scenery Detection:** Dedicated track for beautiful landscape shots
-- ✅ **Faster Processing:** 5-10 min vs. 10-20 min
+- ✅ **Better Quality:** MediaPipe's 33 keypoints provide precise physics metrics (air time, lean angle, rotation)
+- ✅ **Lower Cost:** 33% cheaper ($0.24 vs. $0.36/video)
+- ✅ **Scenery Detection:** Florence-2 detects beautiful landscapes for transitions (YOLO can't!)
+- ✅ **Faster Processing:** 6-10 min vs. 10-20 min
 - ✅ **Scalable:** GPU workers scale 0 → 1000+ on demand
+- ✅ **No Training Required:** MediaPipe + Florence-2 work out-of-the-box (vs. YOLO fine-tuning)
+- ✅ **Custom Prompts Preserved:** GPT-4o-mini still used for detailed MTB-specific analysis
 
 ### Challenges
 
-- ⚠️ **Complexity:** Requires GPU-enabled Cloud Run + YOLO training
-- ⚠️ **Training Data:** 500-1000 annotated MTB videos recommended for fine-tuning
-- ⚠️ **GPU Availability:** L4 GPUs limited in some regions
+- ⚠️ **Complexity:** Requires GPU-enabled Cloud Run (but smaller GPU than YOLO)
+- ⚠️ **Florence-2 Limitations:** Generic captions only, no custom prompts (that's why we keep GPT!)
+- ⚠️ **Multi-Model Orchestration:** Managing 3 AI systems (vs. single model)
 
 ---
 
