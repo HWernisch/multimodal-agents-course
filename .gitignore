@@ -175,3 +175,33 @@ cython_debug/
 
 .DS_Store
 
+# === SaaS-specific secrets ===
+# Clerk
+.clerk/
+clerk-secret-key.txt
+CLERK_SECRET_KEY
+
+# GCP / Firebase
+gcp-service-account.json
+firebase-config.js
+firebase-adminsdk-*.json
+.firebaserc
+.firebase/
+firebase-debug.log
+
+# Production Environment
+.env.production
+.env.production.local
+.env.staging
+.env.staging.local
+
+# Customer Data (never commit!)
+/customer-data/
+/user-uploads/
+/backups/
+*.backup
+
+# API Keys (extra safety)
+*-api-key.txt
+*-secret-key.txt
+
